@@ -24,8 +24,6 @@ def get_emails(main_dir, n=3, vanilla=False):
     ham_test_y, ham_test_x = svm_read_problem(ham_files[1])
     ham_pol_y, ham_pol_x = svm_read_problem(ham_files[2])
 
-
-
     spam_train_y, spam_train_x = svm_read_problem(spam_files[0])
     spam_test_y, spam_test_x = svm_read_problem(spam_files[1])
     spam_pol_y, spam_pol_x = svm_read_problem(spam_files[2])
@@ -60,8 +58,8 @@ def get_emails(main_dir, n=3, vanilla=False):
     size['train_spam'] = len(spam_train_y)
     size['test_ham'] = len(ham_test_y)
     size['test_spam'] = len(spam_test_y)
-    size['total_polluted'] = ham_polluted + spam_polluted
-    size['total_unpolluted'] = train_ham + train_spam
+    size['total_polluted'] = size['ham_polluted'] + size['spam_polluted']
+    size['total_unpolluted'] = size['train_ham'] + size['train_spam']
 
 
     return [(train_y, train_x), (test_y, test_x), size]
