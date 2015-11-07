@@ -19,20 +19,20 @@ end
 fprintf('Processing Hams\n');
 mkdir(o_directory, 'Ham'); % make mislabeled/Ham
 
-for i = 1:size(sets,2)
+for i = 2:size(sets,2)
     % make mislabeled/Ham/Set1
     dir_name = hams{i};
     mkdir([o_directory '/' dir_name]);
     dir_list = readdir([directory '/' dir_name]);
     dir_list([1,2],:) = []; % remove . and .. files
     output = [o_directory '/' dir_name '/data'];
-    if i == 1
+    if i == 2
         dir_size = 3000;
     else
         dir_size = size(dir_list,1);
     endif
     for j = 1:dir_size
-        fprintf([dir_name ': ' num2str(j) '/' num2str(size(dir_list,1)) '\n']);
+        fprintf([dir_name ': ' num2str(j) '/' num2str(dir_size) '\n']);
         f_ = dir_list{j};
         filename = [directory '/' dir_name '/' f_];
         file_contents = readFile(filename);
@@ -62,13 +62,13 @@ for i = 1:size(sets,2)
     dir_list = readdir([directory '/' dir_name]);
     dir_list([1,2],:) = []; % remove . and .. files
     output = [o_directory '/' dir_name '/data'];
-    if i == 1
+    if i == 2
         dir_size = 3000;
     else
         dir_size = size(dir_list,1);
     endif
-    for j = 1:(size(dir_list, 1)/2)
-        fprintf([dir_name ': ' num2str(j) '/' num2str(size(dir_list,1)) '\n']);
+    for j = 1:dir_size
+        fprintf([dir_name ': ' num2str(j) '/' num2str(dir_size) '\n']);
         f_ = dir_list{j};
         filename = [directory '/' dir_name '/' f_];
         file_contents = readFile(filename);
