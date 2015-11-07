@@ -4,7 +4,6 @@ sets = {'Set1', 'Set2', 'Set3'};
 
 directory = 'Mislabeled-Both-1.1';
 o_directory = [directory '-processed'];
-mkdir(o_directory);
 
 fprintf(['Preprocessing emails from ' directory '\n']);
 
@@ -16,12 +15,12 @@ for i = 1:size(sets,2)
     spams{i} = ['Spam/' sets{i}];
 end
 
-fprintf('Processing Hams\n');
-mkdir(o_directory, 'Ham'); % make mislabeled/Ham
+fprintf('Processing Spams\n');
+mkdir(o_directory, 'Spam'); % make mislabeled/Spam
 
 for i = 1:size(sets,2)
-    % make mislabeled/Ham/Set1
-    dir_name = hams{i};
+    % make mislabeled/Spam/Set
+    dir_name = spams{i};
     mkdir([o_directory '/' dir_name]);
     dir_list = readdir([directory '/' dir_name]);
     dir_list([1,2],:) = []; % remove . and .. files
