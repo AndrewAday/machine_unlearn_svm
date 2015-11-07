@@ -1,5 +1,6 @@
 import svm_driver as svm
 import helpers as h
+import au_helpers as au_h
 class ActiveUnlearner:
     """
     Core component of the unlearning algorithm. Container class for most relevant methods, driver/classifier,
@@ -43,6 +44,7 @@ class ActiveUnlearner:
         data_y, data_x = h.compose(self.train_y, self.train_x, self.pol_y, self.pol_x)
         m = svm.train(data_y, data_x, self.params)
         p_label, p_acc, p_val = svm.predict(self.test_y, self.test_x, m)
+        print p_label, p_acc, p_val
         self.current_detection_rate = p_acc[0]
 
     def unlearn(self, cluster):
@@ -471,7 +473,7 @@ class ActiveUnlearner:
         except KeyboardInterrupt:
             return cluster_list
 
-    def impact_active_unlearn(self, outfile, test=False, pollution_set3=True, gold=False, pos_cluster_opt=0, shrink_rejects=False):
+    def impact_active_unlearn(self, outfile, pollution_set3=True, gold=False):
         """
         Attempts to improve the machine by first clustering the training space and then unlearning clusters based off
         of perceived impact to the machine.
@@ -488,20 +490,20 @@ class ActiveUnlearner:
 
             cluster_count, attempt_count = self.lazy_unlearn(detection_rate, unlearned_cluster_list,
                                                              cluster_count, attempt_count,
-                                                             outfile, pollution_set3, gold, pos_cluster_opt,shrink_rejects)
+                                                             outfile, pollution_set3, gold)
 
             print "\nThreshold achieved or all clusters consumed after", cluster_count, "clusters unlearned and", \
                 attempt_count, "clustering attempts.\n"
 
             print "\nFinal detection rate: " + str(self.current_detection_rate) + ".\n"
-            if test:
-                return unlearned_cluster_list
+            
+            return unlearned_cluster_list
 
         except KeyboardInterrupt:
             return unlearned_cluster_list
 
     def lazy_unlearn(self, detection_rate, unlearned_cluster_list, cluster_count, attempt_count, outfile,
-                     pollution_set3, gold, pos_cluster_opt, shrink_rejects):
+                     pollution_set3, gold):
         """
         After clustering, unlearns all clusters with positive impact in the cluster list, in reverse order. This is
         due to the fact that going in the regular order usually first unlearns a large cluster that is actually not
@@ -513,12 +515,12 @@ class ActiveUnlearner:
         """
 
         # returns list of tuples contained (net_rate_change, cluster)
-        cluster_list = cluster_au(self, gold=gold, pos_cluster_opt=pos_cluster_opt,shrink_rejects=shrink_rejects) 
+        cluster_list = au_h.cluster_au(self, gold=gold) 
         
         rejection_rate = .1 # Reject all clusters <= this threshold delta value
         attempt_count += 1
 
-        print ">> Lazy Unlearn Attempt " + str(attempt_count) + " cluster length: ", len(cluster_list)
+        print "Lazy Unlearn Attempt " + str(attempt_count) + " cluster length: ", len(cluster_list)
         print "----------The Cluster List------------"
         print cluster_list
         print "----------/The Cluster List------------"
@@ -573,17 +575,6 @@ class ActiveUnlearner:
         return cluster_count, attempt_count
 
     # -----------------------------------------------------------------------------------
-
-    def shuffle_training(self):
-        """Copies the training space and returns a shuffled working set. This provides the simulation of randomly
-        iterating through the training space, without the complication of actually modifying the training space itself
-        while doing so.
-        """
-        train_examples = self.driver.tester.train_examples # copy all training data to train_examples variable
-        training = [train for train in chain(train_examples[0], train_examples[1], train_examples[2],
-                                             train_examples[3])] # chain all training emails together
-        shuffle(training)
-        return training 
 
     def get_mislabeled(self, update=False):
         """
