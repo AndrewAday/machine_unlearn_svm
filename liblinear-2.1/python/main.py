@@ -172,7 +172,7 @@ def main():
 
         # vanilla active unlearner
         print "-----Initializing vanilla unlearner-----"
-        v_au = ActiveUnlearnDriver.ActiveUnlearner(train_y, train_x, pol_y, pol_x, test_y, test_x)
+        v_au = ActiveUnlearnDriver.ActiveUnlearner(van_train_y, van_train_x, van_pol_y, van_pol_x, van_test_y, van_test_x)
 
         time_2 = time.time()
         train_time = seconds_to_english(time_2 - time_1)
