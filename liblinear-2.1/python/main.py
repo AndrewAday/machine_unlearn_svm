@@ -139,24 +139,33 @@ def main():
     van_emails = pd.get_emails(directory, vanilla=True)
 
     # assign variables to train and test data
-    train_y, train_x = emails[0]
-    test_y, test_x = emails[1]
+    pol_y, pol_x = emails[0]
+    train_y, train_x = emails[1]
+    test_y, test_x = emails[2]
 
-    van_train_y, van_train_x = van_emails[0]
-    van_test_y, van_test_x = van_emails[1]
+    data_y = train_y + pol_y
+    data_x = train_x + pol_x
+
+    van_pol_y, van_pol_x = emails[0]
+    van_train_y, van_train_x = van_emails[1]
+    van_test_y, van_test_x = van_emails[2]
+
+    # group polluted/unpolluted data to train
+    van_data_y = van_train_y + van_pol_y 
+    van_data_x = van_train_x + van_pol_x
     
     print "Calculating initial vanilla detection rate:"
-    van_m = svm.train(van_train_y, van_train_x, params)
+    van_m = svm.train(van_data_y, van_data_x, params)
     van_acc = svm.predict(van_test_y, van_test_x, van_m)
     print "Initial vanilla accuracy: ", van_acc
 
     print "Calculating initial pollued detection rate:"
-    m = svm.train(train_y, train_x, params)
+    m = svm.train(data_y, data_x, params)
     acc = svm.predict(test_y, test_x, m)
     print "Initial polluted accuracy: ", acc
 
     # Calculate the number of emails for polluted, train, test, and total data sets
-    size = emails[2]
+    size = emails[3]
     ham_polluted = size['ham_polluted']
     spam_polluted = size['spam_polluted']
     train_ham = size['train_ham']
@@ -165,6 +174,9 @@ def main():
     test_spam = size['test_spam']
     total_polluted = size['total_polluted']
     total_unpolluted = size['total_unpolluted']
+
+    train
+
     print size
     return
     try:

@@ -37,20 +37,16 @@ def get_emails(main_dir, n=3, vanilla=False):
     if vanilla:
         spam_pol_y = [y * -1 for y in spam_pol_y] # Correct the labeling of data
         ham_pol_y = [y * -1 for y in ham_pol_y]
-        ham_x = ham_train_x + spam_pol_x
-        ham_y = ham_train_y + spam_pol_y
-        spam_x = spam_train_x + ham_pol_x
-        spam_y = spam_train_y + ham_pol_y
-    else:
-        ham_x = ham_train_x + ham_pol_x
-        ham_y = ham_train_y + ham_pol_y
-        spam_x = spam_train_x + spam_pol_x
-        spam_y = spam_train_y + spam_pol_y
 
-    train_x = ham_x + spam_x
-    train_y = ham_y + spam_y
+    pol_x = ham_pol_x + spam_pol_x
+    pol_y = ham_pol_y + spam_pol_y
+    train_x = ham_train_x + spam_train_x
+    train_y = ham_train_y + spam_train_y
+
     assert len(train_x) == len(train_y), \
         "train_x length: %r != train_y length: %r" % (len(train_x), len(train_y))
+    assert len(pol_x) == len(pol_y), \
+        "pol_x length: %r != pol_y length: %r" % (len(pol_x), len(pol_y))
 
     # Compile data size
     size = {}
@@ -63,8 +59,7 @@ def get_emails(main_dir, n=3, vanilla=False):
     size['total_polluted'] = size['ham_polluted'] + size['spam_polluted']
     size['total_unpolluted'] = size['train_ham'] + size['train_spam']
 
-
-    return [(train_y, train_x), (test_y, test_x), size]
+    return [(pol_y, pol_x), (train_y, train_x), (test_y, test_x), size]
 
 
 
