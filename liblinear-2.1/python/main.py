@@ -20,22 +20,22 @@ seconds_to_english = helpers.sec_to_english
 
 
 def unlearn_stats(au, outfile, train_y, train_x, pol_y, pol_x, test_y, test_x, total_polluted, total_unpolluted,
-                  train_time, clusters=False, vanilla=None, noisy_clusters=False):
+                  train_time, vanilla=None, noisy_clusters=False):
         """Runs an unlearn algorithm on an ActiveUnlearner and prints out the resultant stats."""
+        
         outfile.write("---------------------------\n")
-        outfile.write("Data Set: " + data_set + "\n")
-        outfile.write("Vanilla Training: " + str(train[0]) + " ham and " + str(train[1]) + " spam.\n")
-        outfile.write("Testing: " + str(test[0]) + " ham and " + str(test[1]) + " spam.\n")
-        outfile.write("Pollution Training: " + str(polluted[0]) + " ham and " + str(polluted[1]) +
-                      " spam.\n")
+        outfile.write("Data Set: " + directory + "\n")
+        outfile.write("Training: " + str(len(train_y)) + " unpolluted emails\n")
+        outfile.write("Testing: " + str(len(test_y)) + " emails\n")
+        outfile.write("Pollution: " + str(len(pol_y))+ " polluted emails\n")
         if vanilla is not None:
-            outfile.write("Vanilla Detection Rate: " + str(vanilla[0]) + ".\n")
+            outfile.write("Vanilla Detection Rate: " + str(vanilla.current_detection_rate) + ".\n")
         outfile.write("---------------------------\n")
         outfile.write("\n\n")
         outfile.write("CLUSTER AND RATE COUNTS:\n")
         outfile.write("---------------------------\n")
 
-        original_detection_rate = au.driver.tester.correct_classification_rate()
+        original_detection_rate = au.current_detection_rate
 
         outfile.write("0: " + str(original_detection_rate) + "\n")
 
@@ -44,7 +44,7 @@ def unlearn_stats(au, outfile, train_y, train_x, pol_y, pol_x, test_y, test_x, t
         # get the unlearned cluster list
         # Testing shrinking the rejected clusters
         # cluster_list = au.impact_active_unlearn(outfile, test=True, pollution_set3=pollution_set3, gold=True, shrink_rejects=True) 
-        cluster_list = au.impact_active_unlearn(outfile, test=True, pollution_set3=pollution_set3, gold=True, shrink_rejects=False) 
+        cluster_list = au.impact_active_unlearn(outfile, test=True, pollution_set3=pollution_set3, gold=True) 
         
         time_end = time.time()
         unlearn_time = seconds_to_english(time_end - time_start)
@@ -151,7 +151,6 @@ def main():
     van_train_y, van_train_x = van_emails[1]
     van_test_y, van_test_x = van_emails[2]
 
-
     # Calculate the number of emails for polluted, train, test, and total data sets
     size = emails[3]
     ham_polluted = size['ham_polluted']
@@ -177,8 +176,8 @@ def main():
 
         time_2 = time.time()
         train_time = seconds_to_english(time_2 - time_1)
-
         print "Initialization time:", train_time, "\n"
+
         return
         
 

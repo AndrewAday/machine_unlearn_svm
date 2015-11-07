@@ -43,8 +43,7 @@ class ActiveUnlearner:
         data_y, data_x = h.compose(self.train_y, self.train_x, self.pol_y, self.pol_x)
         m = svm.train(data_y, data_x, self.params)
         p_label, p_acc, p_val = svm.predict(self.test_y, self.test_x, m)
-        self.current_detection_rate = p_acc(0)
-        
+        self.current_detection_rate = p_acc[0]
 
     def unlearn(self, cluster):
         """Unlearns a cluster from the ActiveUnlearner."""
@@ -616,9 +615,6 @@ class ActiveUnlearner:
 
         if option == "weighted":
             return self.weighted_initial(working_set,mislabeled)
-        
-        if option == "row_sum":
-            return self.row_sum_initial(working_set, mislabeled)
 
         if option == "mislabeled":
             return self.mislabeled_initial(working_set, mislabeled)
@@ -682,28 +678,6 @@ class ActiveUnlearner:
 
             return init_email
 
-
-    def row_sum_initial(self, working_set, mislabeled):
-        """Returns the email with the smallest row sum from the set of mislabeled emails."""
-        if mislabeled is None:
-            mislabeled = self.get_mislabeled()
-        t_e = self.driver.tester.train_examples
-        minrowsum = sys.maxint
-        init_email = None
-
-        training = chain(t_e[0], t_e[1], t_e[2], t_e[3]) if working_set is None else working_set
-
-        for email in training:
-            rowsum = 0
-            for email2 in mislabeled:
-                dist = distance(email, email2, self.distance_opt)
-                rowsum += dist ** 2
-            if rowsum < minrowsum:
-                minrowsum = rowsum
-                init_email = email
-
-        return init_email
-
     def mislabeled_initial(self, working_set, mislabeled):
         """Chooses an arbitrary email from the mislabeled emails and returns the training email closest to it."""
         if mislabeled is None:
@@ -752,9 +726,6 @@ class ActiveUnlearner:
         print "-> selected ", init_email.tag, " as cluster centroid with distance of ", min_distance, " from mislabeled point"
         print type(init_email)
         return init_email
-
-
-        
 
     def max_sum_initial(self, working_set):
         """
