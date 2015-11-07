@@ -42,7 +42,7 @@ for i = 1:size(sets,2)
         else
             fid = fopen(output, 'a+');
         endif
-        fputs(fid, '-1 ');
+        fputs(fid, '+1 ');
         for k = 1:size(x,1)
             fputs(fid, [num2str(k) ':' num2str(x(k,1)) ' ']);
         end
