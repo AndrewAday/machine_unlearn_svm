@@ -143,6 +143,9 @@ def main():
     train_y, train_x = emails[1]
     test_y, test_x = emails[2]
 
+    print 'THIS IS POL'
+    print pol_y[:5]
+
     data_y = train_y + pol_y
     data_x = train_x + pol_x
 
@@ -150,6 +153,8 @@ def main():
     van_train_y, van_train_x = van_emails[1]
     van_test_y, van_test_x = van_emails[2]
 
+    print 'THIS IS VAN'
+    print van_pol_y[:5]
     # group polluted/unpolluted data to train
     van_data_y = van_train_y + van_pol_y
     van_data_x = van_train_x + van_pol_x
