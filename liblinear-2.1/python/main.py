@@ -147,7 +147,7 @@ def main():
     
     print "Calculating initial vanilla detection rate:"
     van_m = svm.train(van_train_y, van_train_x, params)
-    van_acc = svm.predict(van_test_x, van_test_y, van_m)
+    van_acc = svm.predict(van_test_y, van_test_x, van_m)
     print "Initial vanilla accuracy: ", van_acc
 
     print "Calculating initial pollued detection rate:"
