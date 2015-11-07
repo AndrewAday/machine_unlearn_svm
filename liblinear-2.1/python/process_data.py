@@ -15,7 +15,7 @@ def get_emails(main_dir, n=3, vanilla=False):
     """
     ham_files = _seterize(main_dir, False, n)
     spam_files = _seterize(main_dir, True, n)
-    print "-------For vanilla = ", vanilla, '--------'
+    print "------- For vanilla =", vanilla, '--------'
     print "Processing Ham files: ", ham_files
     print "Processing Spam files: ", spam_files
 
