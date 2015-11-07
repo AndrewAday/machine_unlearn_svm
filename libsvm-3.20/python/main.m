@@ -19,7 +19,7 @@ end
 fprintf('Processing Hams\n');
 mkdir(o_directory, 'Ham'); % make mislabeled/Ham
 
-for i = 2:size(sets,2)
+for i = 1:size(sets,2)
     % make mislabeled/Ham/Set1
     dir_name = hams{i};
     mkdir([o_directory '/' dir_name]);
