@@ -146,9 +146,14 @@ def main():
     van_test_y, van_test_x = van_emails[1]
     
     print "Calculating initial vanilla detection rate:"
-    m = svm.train(van_train_y, van_train_x, params)
-    acc = svm.predict(van_test_x, van_test_y)
-    print "Initial accuracy: ", acc
+    van_m = svm.train(van_train_y, van_train_x, params)
+    van_acc = svm.predict(van_test_x, van_test_y, van_m)
+    print "Initial vanilla accuracy: ", van_acc
+
+    print "Calculating initial pollued detection rate:"
+    m = svm.train(train_y, train_x, params)
+    acc = svm.predict(test_y, test_x, m)
+    print "Initial polluted accuracy: ", acc
 
     # Calculate the number of emails for polluted, train, test, and total data sets
     size = emails[2]
