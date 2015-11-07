@@ -17,7 +17,7 @@ output = directory + "-unlearn-stats"
 seconds_to_english = helpers.sec_to_english
 
 
-def unlearn_stats(au, outfile, data_set, train, test, polluted, total_polluted, total_unpolluted,
+def unlearn_stats(au, outfile, train_y, train_x, pol_y, pol_x, test_y, test_x, total_polluted, total_unpolluted,
                   train_time, clusters=False, vanilla=None, noisy_clusters=False):
         """Runs an unlearn algorithm on an ActiveUnlearner and prints out the resultant stats."""
         outfile.write("---------------------------\n")
@@ -143,26 +143,9 @@ def main():
     train_y, train_x = emails[1]
     test_y, test_x = emails[2]
 
-    data_y = train_y + pol_y
-    data_x = train_x + pol_x
-
     van_pol_y, van_pol_x = van_emails[0]
     van_train_y, van_train_x = van_emails[1]
     van_test_y, van_test_x = van_emails[2]
-
-    # group polluted/unpolluted data to train
-    van_data_y = van_train_y + van_pol_y
-    van_data_x = van_train_x + van_pol_x
-    
-    print "Calculating initial vanilla detection rate:"
-    van_m = svm.train(van_data_y, van_data_x, params)
-    van_acc = svm.predict(van_test_y, van_test_x, van_m)
-    print "Initial vanilla accuracy: ", van_acc
-
-    print "Calculating initial pollued detection rate:"
-    m = svm.train(data_y, data_x, params)
-    acc = svm.predict(test_y, test_x, m)
-    print "Initial polluted accuracy: ", acc
 
     # Calculate the number of emails for polluted, train, test, and total data sets
     size = emails[3]
@@ -174,38 +157,31 @@ def main():
     test_spam = size['test_spam']
     total_polluted = size['total_polluted']
     total_unpolluted = size['total_unpolluted']
-
     print size
-    return
+
     try:
         time_1 = time.time() # begin timer
         # Instantiate ActiveUnlearner object
+        print "-----Initializing polluted unlearner-----"
         au = ActiveUnlearnDriver.ActiveUnlearner(train_y, train_x, pol_y, pol_x, test_y, test_x,
-                                                 distance_opt="frequency5", greedy_opt=False,          
-                                                 include_unsures=False) # Don't unclude unsure emails        
+                                                 params=params, distance_opt="frequency5", 
+                                                 greedy_opt=False)
 
         # vanilla active unlearner
-        # v_au = ActiveUnlearnDriver.ActiveUnlearner([msgs.HamStream(ham_train, [ham_train]), []],
-        #                                            [msgs.SpamStream(spam_train, [spam_train]), []],
-        #                                            msgs.HamStream(ham_test, [ham_test]),
-        #                                            msgs.SpamStream(spam_test, [spam_test]))
-
-        # vanilla_detection_rate = v_au.current_detection_rate
+        print "-----Initializing vanilla unlearner-----"
+        v_au = ActiveUnlearnDriver.ActiveUnlearner(train_y, train_x, pol_y, pol_x, test_y, test_x)
 
         time_2 = time.time()
         train_time = seconds_to_english(time_2 - time_1)
-        print "Train time:", train_time, "\n"
 
+        print "Initialization time:", train_time, "\n"
+        return
         
 
-        with open(dest + data_set + " (unlearn_stats).txt", 'w+') as outfile:
+        with open(output, 'w+') as outfile:
             try:
-                # unlearn_stats(au, outfile, data_set, [train_ham, train_spam], [test_ham, test_spam],
-                #               [ham_polluted, spam_polluted], total_polluted, total_unpolluted,
-                #               train_time, vanilla=[vanilla_detection_rate, v_au], noisy_clusters=True)
-                unlearn_stats(au, outfile, data_set, [train_ham, train_spam], [test_ham, test_spam],
-                              [ham_polluted, spam_polluted], total_polluted, total_unpolluted,
-                              train_time, vanilla=None, noisy_clusters=True)
+                unlearn_stats(au, outfile, train_y, train_x, pol_y, pol_x, test_y, test_x,
+                             total_polluted, total_unpolluted, train_time, vanilla=v_au, noisy_clusters=True)
 
             except KeyboardInterrupt:
                 outfile.flush()
