@@ -3,9 +3,8 @@ from liblinearutil import *
 
 def train(y, x, params):
     """ Trains on y,x and returns the model """
-    prob  = problem(y, x)
     print "Training on data of size: ", len(y)
-    m = train(prob, params)
+    m = train(y,x, params)
     return m
 
 
