@@ -6,6 +6,7 @@ import process_data as pd
 import helpers
 import svm_driver as svm
 import copy
+import ActiveUnlearnDriver
 
 # Set options liblinear
 params = '-c .001'
@@ -133,6 +134,7 @@ def noisy_data_check(pure_clusters, v_au):
 
 
 def main():
+    time_1 = time.time()
     print "Processing ", directory
 
     # Collect the processed data
@@ -163,7 +165,6 @@ def main():
     print size
 
     try:
-        time_1 = time.time() # begin timer
         # Instantiate ActiveUnlearner object
         print "-----Initializing polluted unlearner-----"
         au = ActiveUnlearnDriver.ActiveUnlearner(train_y, train_x, pol_y, pol_x, test_y, test_x,
