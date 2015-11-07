@@ -14,7 +14,7 @@ directory = "Mislabeled-Both-1.1-processed"
 output = directory + "-unlearn-stats"
 
 # rename helpers variables
-seconds_to_english = helpers.seconds_to_english
+seconds_to_english = helpers.sec_to_english
 
 
 def unlearn_stats(au, outfile, data_set, train, test, polluted, total_polluted, total_unpolluted,
