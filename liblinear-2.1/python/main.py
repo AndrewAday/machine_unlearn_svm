@@ -7,7 +7,7 @@ import helpers
 import svm_driver as svm
 
 # Set options liblinear
-params = '-s 2 -C'
+params = '-c .001'
 
 # Choose directory we want to process
 directory = "Mislabeled-Both-1.1-processed"
