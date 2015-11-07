@@ -35,6 +35,8 @@ def get_emails(main_dir, n=3, vanilla=False):
         "test_x length: %r != test_y length: %r" % (len(test_x), len(test_y))
     
     if vanilla:
+        spam_pol_y = [y * -1 for y in spam_pol_y] # Correct the labeling of data
+        ham_pol_y = [y * -1 for y in ham_pol_y]
         ham_x = ham_train_x + spam_pol_x
         ham_y = ham_train_y + spam_pol_y
         spam_x = spam_train_x + ham_pol_x
