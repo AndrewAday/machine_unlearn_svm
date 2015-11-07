@@ -136,7 +136,7 @@ def main():
     print "Processing ", directory
 
     # Collect the processed data
-    emails = pd.get_emails(directory, vanilla=False)
+    emails = pd.get_emails(directory)
     van_emails = copy.deepcopy(emails)
 
     # assign variables to train and test data
