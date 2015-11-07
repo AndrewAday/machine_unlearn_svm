@@ -37,6 +37,7 @@ def get_emails(main_dir, n=3, vanilla=False):
     pol_x = ham_pol_x + spam_pol_x
     pol_y = ham_pol_y + spam_pol_y
     # Correct labeling for vanilla
+    print 'THIS IS POLY_Y'
     print pol_y[:5]
     if vanilla:
         pol_y = [-1 * y for y in pol_y]
