@@ -5,6 +5,7 @@ import time
 import process_data as pd
 import helpers
 import svm_driver as svm
+import copy
 
 # Set options liblinear
 params = '-c .001'
@@ -136,7 +137,7 @@ def main():
 
     # Collect the processed data
     emails = pd.get_emails(directory, vanilla=False)
-    van_emails = pd.get_emails(directory, vanilla=True)
+    van_emails = copy.deepcopy(emails)
 
     # assign variables to train and test data
     pol_y, pol_x = emails[0]
@@ -144,8 +145,10 @@ def main():
     test_y, test_x = emails[2]
 
     van_pol_y, van_pol_x = van_emails[0]
+    van_pol_y = [-1 * y for y in van_pol_y] # correct labeling on vanilla
     van_train_y, van_train_x = van_emails[1]
     van_test_y, van_test_x = van_emails[2]
+
 
     # Calculate the number of emails for polluted, train, test, and total data sets
     size = emails[3]

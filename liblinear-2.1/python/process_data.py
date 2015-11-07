@@ -9,13 +9,13 @@ def _seterize(main_dir, is_spam=False, n=3):
 
     return [parent_dir % i for i in range(1, n + 1)]
 
-def get_emails(main_dir, n=3, vanilla=False):
+def get_emails(main_dir, n=3):
     """ Returns training and testing data 
         Note: it is assumed that pollution data is stored in Set3
     """
     ham_files = _seterize(main_dir, False, n)
     spam_files = _seterize(main_dir, True, n)
-    print "------- For vanilla =", vanilla, '--------'
+    
     print "Processing Ham files: ", ham_files
     print "Processing Spam files: ", spam_files
 
@@ -36,9 +36,6 @@ def get_emails(main_dir, n=3, vanilla=False):
 
     pol_x = ham_pol_x + spam_pol_x
     pol_y = ham_pol_y + spam_pol_y
-    # Correct labeling for vanilla
-    if vanilla:
-        pol_y = [-1 * y for y in pol_y]
     train_x = ham_train_x + spam_train_x
     train_y = ham_train_y + spam_train_y
 
