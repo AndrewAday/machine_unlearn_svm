@@ -143,18 +143,13 @@ def main():
     train_y, train_x = emails[1]
     test_y, test_x = emails[2]
 
-    print 'THIS IS POL'
-    print pol_y[:5]
-
     data_y = train_y + pol_y
     data_x = train_x + pol_x
 
-    van_pol_y, van_pol_x = emails[0]
+    van_pol_y, van_pol_x = van_emails[0]
     van_train_y, van_train_x = van_emails[1]
     van_test_y, van_test_x = van_emails[2]
 
-    print 'THIS IS VAN'
-    print van_pol_y[:5]
     # group polluted/unpolluted data to train
     van_data_y = van_train_y + van_pol_y
     van_data_x = van_train_x + van_pol_x
@@ -185,15 +180,9 @@ def main():
     try:
         time_1 = time.time() # begin timer
         # Instantiate ActiveUnlearner object
-        au = ActiveUnlearnDriver.ActiveUnlearner([msgs.HamStream(ham_train, [ham_train]),
-                                                  msgs.HamStream(ham_p, [ham_p])],        # Training Ham 
-                                                 [msgs.SpamStream(spam_train, [spam_train]),
-                                                  msgs.SpamStream(spam_p, [spam_p])],     # Training Spam
-                                                 msgs.HamStream(ham_test, [ham_test]),          # Testing Ham
-                                                 msgs.SpamStream(spam_test, [spam_test]),       # Testing Spam
-                                                 distance_opt="frequency5", all_opt=True,      
-                                                 update_opt="hybrid", greedy_opt=True,          
-                                                 include_unsures=False, multi_process=True) # Don't unclude unsure emails        
+        au = ActiveUnlearnDriver.ActiveUnlearner(train_y, train_x, pol_y, pol_x, test_y, test_x,
+                                                 distance_opt="frequency5", greedy_opt=False,          
+                                                 include_unsures=False) # Don't unclude unsure emails        
 
         # vanilla active unlearner
         # v_au = ActiveUnlearnDriver.ActiveUnlearner([msgs.HamStream(ham_train, [ham_train]), []],
