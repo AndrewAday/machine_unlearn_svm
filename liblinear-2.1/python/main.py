@@ -175,8 +175,6 @@ def main():
     total_polluted = size['total_polluted']
     total_unpolluted = size['total_unpolluted']
 
-    train
-
     print size
     return
     try:
