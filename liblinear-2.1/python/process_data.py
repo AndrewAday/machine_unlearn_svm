@@ -33,14 +33,12 @@ def get_emails(main_dir, n=3, vanilla=False):
 
     assert len(test_x) == len(test_y), \
         "test_x length: %r != test_y length: %r" % (len(test_x), len(test_y))
-    
-    if vanilla:
-        print "Correcting Labeling for vanilla"
-        spam_pol_y = [y * -1 for y in spam_pol_y] # Correct the labeling of data
-        ham_pol_y = [y * -1 for y in ham_pol_y]
 
     pol_x = ham_pol_x + spam_pol_x
     pol_y = ham_pol_y + spam_pol_y
+    # Correct labeling for vanilla
+    if vanilla: 
+        pol_y = [-1 * y for y in pol_y]
     train_x = ham_train_x + spam_train_x
     train_y = ham_train_y + spam_train_y
 

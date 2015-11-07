@@ -150,11 +150,8 @@ def main():
     van_train_y, van_train_x = van_emails[1]
     van_test_y, van_test_x = van_emails[2]
 
-    # What's wrong with the relabeling?
-    van_pol_y = [-1 * y for y in van_pol_y]
-    
     # group polluted/unpolluted data to train
-    van_data_y = van_train_y + van_pol_y 
+    van_data_y = van_train_y + van_pol_y
     van_data_x = van_train_x + van_pol_x
     
     print "Calculating initial vanilla detection rate:"
