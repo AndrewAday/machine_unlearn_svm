@@ -81,7 +81,7 @@ def determine_cluster(center, au, label, init_pos, working_set=None, gold=False,
     first_state_rate = au.current_detection_rate
     counter = 0
 
-    cluster = Cluster(center, au.increment, au, label, distance_opt=au.distance_opt, working_set=working_set)
+    cluster = Cluster((center,init_pos), au.increment, au, label, distance_opt=au.distance_opt, working_set=working_set)
     # Test detection rate after unlearning cluster
     au.unlearn(cluster)
     au.init_ground()

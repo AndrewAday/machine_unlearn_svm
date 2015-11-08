@@ -16,7 +16,7 @@ def compose(train_y, train_x, pol_y, pol_x):
 
 def compose_set(working_set):
     return compose(working_set[0], working_set[1], working_set[2], working_set[3])
-    
+
 def delist(l):
     """ [[a], [b], [c]] --> [a,b,c] """
     return [e[0] for e in l]
@@ -37,10 +37,7 @@ def refresh(working_set, i):
 def update_word_frequencies(current, new):
     new_word_vector = _vectorize(new)
     for word in new_word_vector:
-        if word in current:
-            current[word] += 1
-        else:
-            current[word] = 1
+        current[word] += 1
     return current
 
 def revert_word_frequencies(current, forget):
@@ -57,5 +54,5 @@ def get_word_frequencies(msg):
         word_freq[word] = 1
     return word_freq
 
-def _vectorize(msg):
-    return [t[1] for t in msg.clues]
+def _vectorize(email):
+    return [k for k in email if email[k] == 1]

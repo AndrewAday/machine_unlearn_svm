@@ -9,7 +9,7 @@ import copy
 import ActiveUnlearnDriver
 
 # Set options liblinear
-params = '-c .001'
+params = '-c .001 -q'
 
 # Choose directory we want to process
 directory = "Mislabeled-Both-1.1-processed"
