@@ -647,7 +647,7 @@ class ActiveUnlearner:
                 print "Training emails remaining: ", len(data_x)
             else:
                 label = data_y[init_pos]
-                print "-> selected cluster centroid with label: " label " and distance: ", min_distance, " from mislabeled point"
+                print "-> selected cluster centroid with label: ", label, " and distance: ", min_distance, " from mislabeled point"
 
             h.update(working_set, init_pos) # set None the values where selected
             assert None in working_set[0] + working_set[2]
