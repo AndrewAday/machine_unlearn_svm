@@ -124,31 +124,37 @@ class ActiveUnlearner:
 
     # --------------------------------------------------------------------------------------------------------------
 
-    def divide_new_elements(self, messages, unlearn):
-        """Divides a given set of emails to be unlearned into ham and spam lists and unlearns both."""
-        hams = []
-        spams = []
-        for message in messages:
-            if message.train == 1 or message.train == 3:
-                hams.append(message)
-
-            elif message.train == 0 or message.train == 2:
-                spams.append(message)
-
-            else:
-                raise AssertionError("Message lacks train attribute.")
-
-            if unlearn:
-                self.driver.tester.train_examples[message.train].remove(message)
-
-            else:
-                self.driver.tester.train_examples[message.train].append(message)
-
+    def divide_new_elements(self, messages, unlearn, original=None):
+        """Divides a given set of emails to be unlearned into ham and spam lists and unlearns both.
+           Param: messages contains indices of emails to learn/unlearn
+        """
         if unlearn:
-            self.driver.untrain(hams, spams)
-
+            h.unlearn([self.train_y, self.train_x, self.pol_y, self.pol_x], messages)
         else:
-            self.driver.train(hams, spams)
+            h.relearn([self.train_y, self.train_x, self.pol_y, self.pol_x], original, messages)
+        # hams = []
+        # spams = []
+        # for message in messages:
+        #     if message.train == 1 or message.train == 3:
+        #         hams.append(message)
+
+        #     elif message.train == 0 or message.train == 2:
+        #         spams.append(message)
+
+        #     else:
+        #         raise AssertionError("Message lacks train attribute.")
+
+        #     if unlearn:
+        #         self.driver.tester.train_examples[message.train].remove(message)
+
+        #     else:
+        #         self.driver.tester.train_examples[message.train].append(message)
+
+        # if unlearn:
+        #     self.driver.untrain(hams, spams)
+
+        # else:
+        #     self.driver.train(hams, spams)
 
     def cluster_by_gold(self, cluster, old_detection_rate, new_detection_rate, counter):
         """Finds an appropriate cluster around a msg by using the golden section search method."""
@@ -163,7 +169,7 @@ class ActiveUnlearner:
 
             else:
                 new_learns = cluster.cluster_less(self.increment)
-                self.divide_new_elements(new_learns, False)
+                self.divide_new_elements(new_learns, False, cluster.working_set)
                 return cluster
 
         else:
@@ -175,38 +181,21 @@ class ActiveUnlearner:
         Performs golden section search on the size of a cluster; grows/shrinks exponentially at a rate of phi to ensure that
         window ratios will be same at all levels (except edge cases), and uses this to determine the initial window.
         """
-        if shrink_rejects:
-            shrink_cluster = cluster.size - int(cluster.size/phi)
-            while counter == 0 or new_detection_rate > old_detection_rate:
-                counter += 1
-                sizes.append(cluster.size)
-                detection_rates.append(new_detection_rate)
-                old_detection_rate = new_detection_rate
-                print "\n Exploring a shrunk cluster of size", cluster.size - shrink_cluster, "...\n"
-                
-                new_learns = cluster.cluster_less(shrink_cluster)
-                shrink_cluster = cluster.size - int(cluster.size/phi)
+        extra_cluster = int(phi * cluster.size)
+        while new_detection_rate > old_detection_rate:
+            counter += 1
 
-                self.divide_new_elements(new_learns, False)
-                self.init_ground()
-                new_detection_rate = self.driver.tester.correct_classification_rate()
+            sizes.append(cluster.size)
+            detection_rates.append(new_detection_rate)
+            old_detection_rate = new_detection_rate
+            print "\nExploring cluster of size", cluster.size + int(round(extra_cluster)), "...\n"
 
-        else:
-            extra_cluster = int(phi * cluster.size)
-            while new_detection_rate > old_detection_rate:
-                counter += 1
+            new_unlearns = cluster.cluster_more(int(round(extra_cluster))) # new_unlearns is array of newly added emails
+            extra_cluster *= phi
 
-                sizes.append(cluster.size)
-                detection_rates.append(new_detection_rate)
-                old_detection_rate = new_detection_rate
-                print "\nExploring cluster of size", cluster.size + int(round(extra_cluster)), "...\n"
-
-                new_unlearns = cluster.cluster_more(int(round(extra_cluster))) # new_unlearns is array of newly added emails
-                extra_cluster *= phi
-
-                self.divide_new_elements(new_unlearns, True) # unlearns the newly added elements
-                self.init_ground() # rerun test to find new classification accuracy
-                new_detection_rate = self.driver.tester.correct_classification_rate()
+            self.divide_new_elements(new_unlearns, True) # unlearns the newly added elements
+            self.init_ground() # rerun test to find new classification accuracy
+            new_detection_rate = self.driver.tester.correct_classification_rate()
 
         sizes.append(cluster.size) # array of all cluster sizes
         detection_rates.append(new_detection_rate) # array of all classification rates
@@ -227,7 +216,7 @@ class ActiveUnlearner:
         pointer = middle_1
         iterations = 0
         new_relearns = cluster.cluster_less(right - middle_1)
-        self.divide_new_elements(new_relearns, False)
+        self.divide_new_elements(new_relearns, False, cluster.working_set)
 
         assert(len(sizes) == len(detection_rates)), len(sizes) - len(detection_rates)
         f = dict(zip(sizes, detection_rates))
@@ -278,7 +267,7 @@ class ActiveUnlearner:
         elif pointer > size:
             new_relearns = cluster.cluster_less(pointer - size)
             assert(cluster.size == size), str(size) + " " + str(cluster.size)
-            self.divide_new_elements(new_relearns, False)
+            self.divide_new_elements(new_relearns, False, cluster.working_set)
 
         else:
             raise AssertionError("Pointer is at the midpoint of the window.")
@@ -299,7 +288,7 @@ class ActiveUnlearner:
         pointer = middle_1
         if cluster.size > pointer:
             new_relearns = cluster.cluster_less(cluster.size - pointer)
-            self.divide_new_elements(new_relearns, False)
+            self.divide_new_elements(new_relearns, False, cluster.working_set)
 
         elif cluster.size < pointer:
             new_unlearns = cluster.cluster_more(pointer - cluster.size)
@@ -314,7 +303,7 @@ class ActiveUnlearner:
             pointer = middle_1
             print "Pointer is at " + str(pointer) + ".\n"
             assert(cluster.size == pointer), cluster.size
-            self.divide_new_elements(new_relearns, False)
+            self.divide_new_elements(new_relearns, False, cluster.working_set)
             self.init_ground()
             rate_1 = self.driver.tester.correct_classification_rate()
             f[middle_1] = rate_1
