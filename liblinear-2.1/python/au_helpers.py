@@ -13,7 +13,7 @@ def cluster_au(au, gold=True):
     pol_y = copy.deepcopy(au.pol_y)
     pol_x = copy.deepcopy(au.pol_x)
 
-    original_training_size = len(data.strip(pol_y)) + len(data.strip(train_y))
+    original_training_size = len(h.strip(pol_y)) + len(h.strip(train_y))
 
     print "\nResetting mislabeled...\n"
     mislabeled = au.get_mislabeled(update=True) # gets an array of all false positives, false negatives
@@ -21,7 +21,7 @@ def cluster_au(au, gold=True):
 
     print "\n Clustering...\n"
     pre_cluster_rate = au.current_detection_rate
-    training_size = len(data.strip(pol_y)) + len(data.strip(train_y))
+    training_size = len(h.strip(pol_y)) + len(h.strip(train_y))
     while training_size > 0: # loop until all emails in phantom training space have been assigned
         print "\n-----------------------------------------------------\n"
         print "\n" + str(training_size) + " emails out of " + str(original_training_size) + \
@@ -59,7 +59,7 @@ def cluster_au(au, gold=True):
         print "\nRemoving cluster from shuffled training set...\n"
 
         h.unlearn(training, cluster.cluster_set)
-        training_size = len(data.strip(pol_y)) + len(data.strip(train_y))
+        training_size = len(h.strip(pol_y)) + len(h.strip(train_y))
 
     cluster_list.sort() # sorts by net_rate_change
     print "\nClustering process done and sorted.\n"
