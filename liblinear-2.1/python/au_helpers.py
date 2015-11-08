@@ -8,10 +8,14 @@ def cluster_au(au, gold=True):
     
     print "\n----------------------Beginning the Clustering Process-----------------------\n"
     cluster_list = [] # list of tuples (net_rate_change, cluster)
-    train_y = copy.deepcopy(au.train_y)
-    train_x = copy.deepcopy(au.train_x)
-    pol_y = copy.deepcopy(au.pol_y)
-    pol_x = copy.deepcopy(au.pol_x)
+    # train_y = copy.deepcopy(au.train_y)
+    # train_x = copy.deepcopy(au.train_x)
+    # pol_y = copy.deepcopy(au.pol_y)
+    # pol_x = copy.deepcopy(au.pol_x)
+    train_y = au.train_y
+    train_x = au.train_x
+    pol_y = au.pol_y
+    pol_x = au.pol_x
 
     original_training_size = len(h.strip(pol_y)) + len(h.strip(train_y))
 
