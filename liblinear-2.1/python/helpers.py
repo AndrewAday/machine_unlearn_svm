@@ -1,4 +1,3 @@
-import time
 
 def sec_to_english(sec):
     sec_trunc_1 = int(sec // 60) * 60
@@ -52,14 +51,9 @@ def strip(data):
     return data
 
 def update_word_frequencies(current, new, t=False):
-    if t:
-        time_1 = time.time()
     new_word_vector = _vectorize(new)
     for word in new_word_vector:
         current[word] += 1
-    if t:
-        time_2 = time.time()
-        print "update_word_frequencies took: ", sec_to_english(time_2 - time_1)
     return current
 
 def revert_word_frequencies(current, forget):

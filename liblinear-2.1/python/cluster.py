@@ -60,12 +60,7 @@ class Cluster:
         if t:
             time_1 = time.time()
         indices = [train[1] for train in self.dist_list] # get array of indices
-        if t:
-            time_3 = time.time()
         self.dist_list = [(distance(self.vec_data_x[i], self.cluster_word_frequency, self.opt), i) for i in indices]
-        if t:
-            time_4 = time.time()
-            print "generating the dist_list took: ", h.sec_to_english(time_4 - time_3)
         self.dist_list.sort()
         if t:
             time_2 = time.time()

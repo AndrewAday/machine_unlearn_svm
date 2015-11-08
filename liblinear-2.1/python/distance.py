@@ -20,4 +20,7 @@ def vectorize_set(s):
     return [_vectorize(e) for e in s]
 
 def _vectorize(email):
-    return [k for k in email if email[k] == 1]
+    if email is None:
+        return [None]
+    else:
+        return [k for k in email if email[k] == 1]
