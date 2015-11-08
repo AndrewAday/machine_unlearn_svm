@@ -44,7 +44,7 @@ def unlearn_stats(au, outfile, train_y, train_x, pol_y, pol_x, test_y, test_x, t
         # get the unlearned cluster list
         # Testing shrinking the rejected clusters
         # cluster_list = au.impact_active_unlearn(outfile, test=True, pollution_set3=pollution_set3, gold=True, shrink_rejects=True) 
-        cluster_list = au.impact_active_unlearn(outfile, test=True, gold=True) 
+        cluster_list = au.impact_active_unlearn(outfile, gold=True) 
         
         time_end = time.time()
         unlearn_time = seconds_to_english(time_end - time_start)

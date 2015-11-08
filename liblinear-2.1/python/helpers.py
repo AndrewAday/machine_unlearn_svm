@@ -14,6 +14,9 @@ def compose(train_y, train_x, pol_y, pol_x):
     data_x = train_x + pol_x
     return (data_y, data_x)
 
+def compose_set(working_set):
+    return compose(working_set[0], working_set[1], working_set[2], working_set[3])
+    
 def delist(l):
     """ [[a], [b], [c]] --> [a,b,c] """
     return [e[0] for e in l]

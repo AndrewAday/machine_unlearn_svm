@@ -1,6 +1,6 @@
 import sys
 
-def distance(email, frequency, distance_opt):
+def distance(email, frequency, distance_opt):s
     if distance_opt == "frequency5":
         # (1/(N2+1)+1/(N3+1)+1/(N8+1)) / (|M|*|M|), 
         # where M is the number of common features between the cluster and the sample.  

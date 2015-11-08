@@ -610,12 +610,6 @@ class ActiveUnlearner:
         if option == "weighted":
             return self.weighted_initial(working_set,mislabeled)
 
-        if option == "mislabeled":
-            return self.mislabeled_initial(working_set, mislabeled)
-
-        if option == "max_sum":
-            return self.max_sum_initial(working_set)
-
     def weighted_initial(self, working_set, mislabeled):
         print "Total Cluster Centroids Chosen: ", len(self.mislabeled_chosen)
 
@@ -629,7 +623,7 @@ class ActiveUnlearner:
             print "Chose the mislabeled point with z = ", prob
             print mislabeled_point
 
-            data_y, data_x = h.compose(working_set[0],working_set[1],working_set[2],working_set[3])
+            data_y, data_x = h.compose(working_set)
 
             init_email = None
             init_pos = None
@@ -651,34 +645,4 @@ class ActiveUnlearner:
 
             h.update(working_set, init_pos) # set None the values where selected
             assert None in working_set[0] + working_set[2]
-            return (label, init_email)
-
-    def max_sum_initial(self, working_set):
-        """
-        Returns the email that is "furthest" from the set of chosen seeds, by finding the email with the highest
-        sum of distances.
-        """
-        print "Total Chosen: ", len(self.training_chosen)
-        t_e = self.driver.tester.train_examples
-
-        try:
-            max_sum = 0
-            init_email = None
-
-            training = chain(t_e[0], t_e[1], t_e[2], t_e[3]) if working_set is None else working_set
-
-            for email in training:
-                current_sum = chosen_sum(self.training_chosen, email, self.distance_opt)
-                if current_sum > max_sum and email not in self.training_chosen:
-                    init_email = email
-                    max_sum = current_sum
-
-            assert(init_email is not None)
-            self.training_chosen.add(init_email)
-            return init_email
-
-        except AssertionError:
-            print "Returning initial seed based off of mislabeled...\n"
-            init_email = self.select_initial(option="mislabeled")
-            self.training_chosen.add(init_email)
-            return init_email
+            return (label, init_pos, init_email)
