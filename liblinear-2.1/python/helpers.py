@@ -22,9 +22,10 @@ def delist(l):
     return [e[0] for e in l]
 
 def unlearn(working_set, indices):
+    train_size = len(working_set[0])
     for i in indices:
-        if i >= len(working_set[0]): # remove from pol, not train
-            i -= len(working_set[0])
+        if i >= train_size: # remove from pol, not train
+            i -= train_size
             working_set[2][i] = None
             working_set[3][i] = None
         else:
@@ -33,9 +34,10 @@ def unlearn(working_set, indices):
 
 def relearn(working_set, original, indices):
     """ restores values of index i to the working set """
+    train_size = len(working_set[0])
     for i in indices:
-        if i >= len(working_set[0]): # remove from pol, not train
-            i -= len(working_set[0])
+        if i >= train_size: # remove from pol, not train
+            i -= train_size
             working_set[2][i] = original[2][i]
             working_set[3][i] = original[3][i]
         else:

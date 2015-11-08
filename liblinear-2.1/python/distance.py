@@ -8,7 +8,7 @@ def distance(email, frequency, distance_opt):
         distance = 0.0
         common_features = 1
         email_indices = _vectorize(email)
-        if len(email_indices == 0):
+        if len(email_indices) == 0:
             return sys.maxint
         for k in email_indices:
             if frequency[k] != 0:

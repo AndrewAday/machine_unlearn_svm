@@ -490,7 +490,7 @@ class ActiveUnlearner:
 
         print len(mislabeled), " mislabeled emails remaining as possible cluster centroids" 
         if len(mislabeled) == 0: #No more centers to select
-            return (None, 'NO_CENTROIDS')
+            return (None, None, 'NO_CENTROIDS')
         else:
             prob, mislabeled_point = mislabeled.pop(0) # Choose most potent mislabeled email 
             self.mislabeled_chosen.append(mislabeled_point)

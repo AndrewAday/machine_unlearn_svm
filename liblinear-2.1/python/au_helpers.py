@@ -13,6 +13,8 @@ def cluster_au(au, gold=True):
     pol_y = copy.deepcopy(au.pol_y)
     pol_x = copy.deepcopy(au.pol_x)
 
+    training = [train_y, train_x, pol_y, pol_x] # create the working set
+
     original_training_size = len(h.strip(pol_y)) + len(h.strip(train_y))
 
     print "\nResetting mislabeled...\n"
@@ -27,8 +29,6 @@ def cluster_au(au, gold=True):
         print "\n" + str(training_size) + " emails out of " + str(original_training_size) + \
               " still unclustered.\n"
 
-        training = [train_y, train_x, pol_y, pol_x]
-
         # Choose an arbitrary email from the mislabeled emails and returns the training email closest to it.
         # Final call and source of current_seed is mislabeled_initial() function
         # current_seed = cluster_methods(au, "mislabeled", training, mislabeled) 
@@ -38,7 +38,7 @@ def cluster_au(au, gold=True):
             label, init_pos, current_seed = au.select_initial(mislabeled, "weighted", training) 
 
         if str(current_seed) == 'NO_CENTROIDS':
-            cluster_result = cluster_remaining(au, training, impact=True) # TODO implement cluster_result
+            cluster_result = cluster_remaining(au, training) # TODO implement cluster_result
         else:
             cluster_result = determine_cluster(current_seed, au, label, init_pos, working_set=training, gold=gold) # if true, relearn clusters after returning them
         if cluster_result is None:
@@ -76,7 +76,7 @@ def determine_cluster(center, au, label, init_pos, working_set=None, gold=False,
     first_state_rate = au.current_detection_rate
     counter = 0
 
-    cluster = Cluster((center,init_pos), au.increment, au, label, distance_opt=au.distance_opt, working_set=working_set)
+    cluster = Cluster((center,init_pos), au.increment, au, label, au.distance_opt, working_set=working_set)
     # Test detection rate after unlearning cluster
     au.unlearn(cluster)
     au.init_ground()
@@ -114,4 +114,43 @@ def determine_cluster(center, au, label, init_pos, working_set=None, gold=False,
             print "cluster found with a net rate change of ", second_state_rate, " - ", first_state_rate, " = ", net_rate_change
             au.current_detection_rate = first_state_rate
             return net_rate_change, cluster
+
+def cluster_remaining(au, working_set):
+    """ This function is called if weighted_initial returns NO_CENTROIDS, meaning there are no more misabeled emails to use as centers.
+    The remaining emails in the working set are then returned as one cluster.
+    """
+
+    print "No more cluster centroids, grouping all remaining emails into one cluster"
+
+    first_state_rate = au.current_detection_rate
+
+    size = len(h.strip(working_set[0])) # get number of remaining emails
+    init_email = None
+    init_pos = None
+    label = None
+    data_y, data_x = h.compose_set(working_set)
+    for i,l in enumerate(data_y): # loop to find first email that is not none 
+        if l is not None:
+            label = l
+            init_pos = i
+            init_email = data_x[i]
+    center = (init_email, init_pos)
+
+    cluster = Cluster(center, size, au, label, au.distance_opt, working_set=working_set)
+
+    au.unlearn(cluster)
+    au.init_ground()
+    new_detection_rate = au.current_detection_rate
+
+    au.learn(cluster) # relearn cluster in real training space so deltas of future cluster are not influenced
+    second_state_rate = au.current_detection_rate
+    
+    net_rate_change = second_state_rate - first_state_rate
+    au.current_detection_rate = first_state_rate
+
+    assert(au.current_detection_rate == first_state_rate), str(au.current_detection_rate) + " " + str(first_state_rate)
+    print "clustered remaining with a net rate change of ", second_state_rate, " - ", first_state_rate, " = ", net_rate_change
+    
+    return net_rate_change, cluster
+
 
