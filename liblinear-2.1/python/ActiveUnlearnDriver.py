@@ -633,6 +633,7 @@ class ActiveUnlearner:
 
             init_email = None
             init_pos = None
+            label = None
             if "frequency" in self.distance_opt:
                 min_distance = sys.maxint
                 for i,email in enumerate(data_x):
@@ -643,11 +644,14 @@ class ActiveUnlearner:
                         min_distance = current_distance
 
             if init_email is None:
-                print "Training emails remaining: ", training
+                print "Training emails remaining: ", len(data_x)
             else:
-                print "-> selected cluster centroid with distance of ", min_distance, " from mislabeled point"
+                label = data_y[init_pos]
+                print "-> selected cluster centroid with label: " label " and distance: ", min_distance, " from mislabeled point"
 
-            return (data_y[init_pos], init_email)
+            h.update(working_set, init_pos) # set None the values where selected
+            assert None in working_set[0] + working_set[2]
+            return (label, init_email)
 
     def max_sum_initial(self, working_set):
         """
