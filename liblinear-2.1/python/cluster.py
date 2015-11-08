@@ -46,6 +46,7 @@ class Cluster:
         dist_list.sort() # sorts tuples by first element default, the distance
 
         print "\n ----------------Generated Distance Array----------------\n"
+        print [email[0] for email in dist_list[:5]]
         print [email[1] for email in dist_list[:5]]
 
         return dist_list
@@ -53,7 +54,7 @@ class Cluster:
     def update_dist_list(self, separate=True): 
         """Updates self.dist_list for the frequency method"""
         indices = [train[1] for train in self.dist_list] # get array of indices
-        self.dist_list = [(distance(self.data_x[i], self.cluster_word_frequency, self.opt), i) for i in indices]
+        self.dist_list = [(distance(self.   [i], self.cluster_word_frequency, self.opt), i) for i in indices]
         self.dist_list.sort()
 
     def make_cluster(self):
@@ -75,6 +76,8 @@ class Cluster:
                 self.cluster_word_frequency = h.update_word_frequencies(self.cluster_word_frequency, self.data_x[i]) # update word frequencies
                 self.update_dist_list() # new cluster_word_frequency, so need to resort closest emails
                 current_size += 1
+                if current_size % 10 == 0:
+                    print current_size, "/", self.size
             print "-> cluster initialized with size", len(emails)
         return set(emails)
 
@@ -98,6 +101,8 @@ class Cluster:
                 self.cluster_word_frequency = h.update_word_frequencies(self.cluster_word_frequency, self.data_x[i]) # update word frequencies
                 self.update_dist_list()
                 added += 1
+                if added % 10 == 0:
+                    print added, "/", n
             assert(len(new_elements) == n), str(len(new_elements)) + " " + str(n)
             assert(len(self.cluster_set) == self.size), str(len(self.cluster_set)) + " " + str(self.size)
             self.divide(new_elements)
@@ -131,15 +136,15 @@ class Cluster:
         if new_elements is None:
             for msg in self.cluster_set: # indices of added msgs
                 if self.data_y[msg] == -1:
-                    self.ham.add(msg) if rem else self.ham.remove(msg)
+                    self.ham.add(msg) if not rem else self.ham.remove(msg)
                 else:
-                    self.spam.add(msg) if rem else self.spam.remove(msg)
+                    self.spam.add(msg) if not rem else self.spam.remove(msg)
         else:
             for msg in self.new_elements:
                 if self.data_y[msg] == -1:
-                    self.ham.add(msg) if rem else self.ham.remove(msg)
+                    self.ham.add(msg) if not rem else self.ham.remove(msg)
                 else:
-                    self.spam.add(msg) if rem else self.spam.remove(msg)
+                    self.spam.add(msg) if not rem else self.spam.remove(msg)
 
     def target_spam(self):
         """Returns a count of the number of spam emails in the cluster."""
