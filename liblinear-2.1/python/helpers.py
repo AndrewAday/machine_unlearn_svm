@@ -13,3 +13,7 @@ def compose(train_y, train_x, pol_y, pol_x):
     data_y = train_y + pol_y
     data_x = train_x + pol_x
     return (data_y, data_x)
+
+def delist(l):
+    """ [[a], [b], [c]] --> [a,b,c] """
+    return [e[0] for e in l]

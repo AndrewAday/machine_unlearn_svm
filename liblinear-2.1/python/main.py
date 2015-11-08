@@ -178,9 +178,6 @@ def main():
         train_time = seconds_to_english(time_2 - time_1)
         print "Initialization time:", train_time, "\n"
 
-        return
-        
-
         with open(output, 'w+') as outfile:
             try:
                 unlearn_stats(au, outfile, train_y, train_x, pol_y, pol_x, test_y, test_x,

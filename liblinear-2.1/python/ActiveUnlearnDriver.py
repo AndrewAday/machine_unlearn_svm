@@ -1,6 +1,7 @@
 import svm_driver as svm
 import helpers as h
 import au_helpers as au_h
+from distance import distance
 class ActiveUnlearner:
     """
     Core component of the unlearning algorithm. Container class for most relevant methods, driver/classifier,
@@ -26,6 +27,8 @@ class ActiveUnlearner:
         self.threshold = threshold
 
         # Performance Variables
+        self.p_label = None
+        self.p_val = None
         
         # Train algorithm normally
         self.current_detection_rate = 0
@@ -44,7 +47,8 @@ class ActiveUnlearner:
         data_y, data_x = h.compose(self.train_y, self.train_x, self.pol_y, self.pol_x)
         m = svm.train(data_y, data_x, self.params)
         p_label, p_acc, p_val = svm.predict(self.test_y, self.test_x, m)
-        print p_label, p_acc, p_val
+        self.p_label = p_label
+        self.p_val = h.delist(p_val)
         self.current_detection_rate = p_acc[0]
 
     def unlearn(self, cluster):
@@ -585,20 +589,19 @@ class ActiveUnlearner:
         """
         if update:
             self.init_ground()
+        # find indices where pred != actual
+        assert len(self.p_val) == len(self.test_y), \
+            "self.p_val length: %r != self.test_y length: %r" % (len(self.p_val), len(self.test_y))
+        mis_indices = []
+        for x in range(len(self.p_val)):
+            if self.p_val[x] != self.test_y[x]:
+                mis_indices.append(x)
 
-        mislabeled = set()
-        # CURRENTLY USING HAM_CUTOFF OF .20 AND SPAM_CUTOFF OF .80
-        tester = self.driver.tester
-        for wrong_ham in tester.ham_wrong_examples: # ham called spam
-            mislabeled.add(wrong_ham)
-
-        for wrong_spam in tester.spam_wrong_examples: # spam called ham
-            mislabeled.add(wrong_spam)
-
-        if self.include_unsures: # otherwise don't include the unsures
-            for unsure in tester.unsure_examples:
-                mislabeled.add(unsure)
-
+        mislabeled = [(self.p_val[i], self.test_x[i]) for i in mis_indices] # (p_val, data vector)
+        mislabeled.sort(key=lambda x: abs(x), reverse=True) # sort in descending order
+        print "Generated mislabeled list of length: ", len(mislabeled)
+        print mislabeled[:5] 
+        
         return mislabeled
 
     def select_initial(self, mislabeled=None, option="mislabeled", working_set=None):
@@ -614,109 +617,37 @@ class ActiveUnlearner:
             return self.max_sum_initial(working_set)
 
     def weighted_initial(self, working_set, mislabeled):
-        if mislabeled is None: # Note that mislabeled is sorted in descending order by fabs(.50-email.prob)
-            mislabeled = self.get_mislabeled()
-        t_e = self.driver.tester.train_examples
-
         print "Total Cluster Centroids Chosen: ", len(self.mislabeled_chosen)
 
-        possible_centroids = list(mislabeled - self.mislabeled_chosen)
-
-        print len(possible_centroids), " mislabeled emails remaining as possible cluster centroids" 
-        if len(possible_centroids) == 0: #No more centers to select
-            return NO_CENTROIDS
+        print len(mislabeled), " mislabeled emails remaining as possible cluster centroids" 
+        if len(mislabeled) == 0: #No more centers to select
+            return (None, 'NO_CENTROIDS')
         else:
-            possible_centroids.sort(key=lambda x: fabs(.50-x.prob), reverse=True)
-
-            mislabeled_point = possible_centroids[0] # Choose most potent mislabeled email
+            prob, mislabeled_point = mislabeled.pop(0) # Choose most potent mislabeled email 
             self.mislabeled_chosen.add(mislabeled_point)
 
-            print "Chose the mislabeled point: ", mislabeled_point.tag
-            print "Probability: ", mislabeled_point.prob
+            print "Chose the mislabeled point with z = ", prob
+            print mislabeled_point
+
+            data_y, data_x = h.compose(working_set[0],working_set[1],working_set[2],working_set[3])
 
             init_email = None
-
-            training = chain(t_e[0], t_e[1], t_e[2], t_e[3]) if working_set is None else working_set
+            init_pos = None
             if "frequency" in self.distance_opt:
                 min_distance = sys.maxint
-                mislabeled_point_frequencies = helpers.get_word_frequencies(mislabeled_point)
-                for email in training:
-                    current_distance = distance(email, mislabeled_point_frequencies, self.distance_opt)
+                for i,email in enumerate(data_x):
+                    current_distance = distance(email, mislabeled_point, self.distance_opt)
                     if current_distance < min_distance:
                         init_email = email
+                        init_pos = i
                         min_distance = current_distance
 
-            elif self.distance_opt == "intersection":
-                min_distance = -1
-                for email in training: # select closest email to randomly selected mislabeled test email
-                    current_distance = distance(email, mislabeled_point, self.distance_opt)
-                    if current_distance > min_distance:
-                        init_email = email
-                        min_distance = current_distance
-            else:
-                min_distance = sys.maxint
-                for email in training: # select closest email to randomly selected mislabeled test email
-                    current_distance = distance(email, mislabeled_point, self.distance_opt)
-                    if current_distance < min_distance:
-                        init_email = email
-                        min_distance = current_distance
-            print type(init_email)
-            
             if init_email is None:
                 print "Training emails remaining: ", training
             else:
-                print "-> selected ", init_email.tag, " as cluster centroid with distance of ", min_distance, " from mislabeled point"
+                print "-> selected cluster centroid with distance of ", min_distance, " from mislabeled point"
 
-            return init_email
-
-    def mislabeled_initial(self, working_set, mislabeled):
-        """Chooses an arbitrary email from the mislabeled emails and returns the training email closest to it."""
-        if mislabeled is None:
-            mislabeled = self.get_mislabeled()
-        t_e = self.driver.tester.train_examples
-
-        print "Total Chosen: ", len(self.mislabeled_chosen)
-
-        try:
-            mislabeled_point = choice(list(mislabeled - self.mislabeled_chosen))
-            self.mislabeled_chosen.add(mislabeled_point)
-        except:
-            raise AssertionError(str(mislabeled))
-
-        print "Chose the mislabeled point: ", mislabeled_point
-        print "File path: ", mislabeled_point.tag
-        print "Probability: ", mislabeled_point.prob
-
-        init_email = None
-
-        training = chain(t_e[0], t_e[1], t_e[2], t_e[3]) if working_set is None else working_set
-        if "frequency" in self.distance_opt:
-            min_distance = sys.maxint
-            mislabeled_point_frequencies = helpers.get_word_frequencies(mislabeled_point)
-            for email in training:
-                current_distance = distance(email, mislabeled_point_frequencies, self.distance_opt)
-                if current_distance < min_distance:
-                    init_email = email
-                    min_distance = current_distance
-
-        elif self.distance_opt == "intersection":
-            min_distance = -1
-            for email in training: # select closest email to randomly selected mislabeled test email
-                current_distance = distance(email, mislabeled_point, self.distance_opt)
-                if current_distance > min_distance:
-                    init_email = email
-                    min_distance = current_distance
-        else:
-            min_distance = sys.maxint
-            for email in training: # select closest email to randomly selected mislabeled test email
-                current_distance = distance(email, mislabeled_point, self.distance_opt)
-                if current_distance < min_distance:
-                    init_email = email
-                    min_distance = current_distance
-        print "-> selected ", init_email, " as cluster centroid with distance of ", min_distance, " from mislabeled point"
-        print "-> selected ", init_email.tag, " as cluster centroid with distance of ", min_distance, " from mislabeled point"
-        print type(init_email)
-        return init_email
+            return (data_y[init_pos], init_email)
 
     def max_sum_initial(self, working_set):
         """

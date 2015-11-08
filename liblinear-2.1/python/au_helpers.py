@@ -12,29 +12,34 @@ def cluster_au(au, gold=False):
     pol_y = copy.deepcopy(au.pol_y)
     pol_x = copy.deepcopy(au.pol_x)
 
+    original_training_size = len(pol_y) + len(train_y)
+
     print "\nResetting mislabeled...\n"
     mislabeled = au.get_mislabeled(update=True) # gets an array of all false positives, false negatives
-    # ^ also runs init_ground, which will update accuracy of classifier on test emails
-    
-    au.mislabeled_chosen = set() # reset set of clustered mislabeled emails in this instance of au
+    au.mislabeled_chosen = [] # reset set of clustered mislabeled emails in this instance of au
 
     print "\n Clustering...\n"
-    original_training_size = len(training)
+    original_training_size = training_size
     pre_cluster_rate = au.current_detection_rate
-    while len(training) > 0: # loop until all emails in phantom training space have been assigned
+    while len(pol_y) + len(train_y) > 0: # loop until all emails in phantom training space have been assigned
         print "\n-----------------------------------------------------\n"
-        print "\n" + str(len(training)) + " emails out of " + str(original_training_size) + \
+        remaining = len(pol_y) + len(train_y)
+        print "\n" + str(len(remaining)) + " emails out of " + str(original_training_size) + \
               " still unclustered.\n"
+
+        training = [train_y, train_x, pol_y, pol_x]
 
         # Choose an arbitrary email from the mislabeled emails and returns the training email closest to it.
         # Final call and source of current_seed is mislabeled_initial() function
         # current_seed = cluster_methods(au, "mislabeled", training, mislabeled) 
-        current_seed = cluster_methods(au, "weighted", training, mislabeled) # weighted function selects most confident falsely labeled email
+        current_seed = None 
+        label = none
         while current_seed is None:
-            current_seed = cluster_methods(au, "weighted", training, mislabeled) # weighted function selects most confident falsely labeled email
-        if str(current_seed) == NO_CENTROIDS:
-            current_seed = choice(training) # choose random remail from remaining emails as seed
-            cluster_result = cluster_remaining(current_seed, au, training, impact=True)
+            label, current_seed = au.select_initial(mislabeled, "weighted", training) 
+
+        return
+        if str(current_seed) == 'NO_CENTROIDS':
+            cluster_result = cluster_remaining(au, training, impact=True)
         else:
             cluster_result = determine_cluster(current_seed, au, working_set=training, gold=gold, impact=True) # if true, relearn clusters after returning them
         if cluster_result is None:
