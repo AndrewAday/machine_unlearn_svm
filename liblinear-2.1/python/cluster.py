@@ -54,7 +54,7 @@ class Cluster:
     def update_dist_list(self, separate=True): 
         """Updates self.dist_list for the frequency method"""
         indices = [train[1] for train in self.dist_list] # get array of indices
-        self.dist_list = [(distance(self.   [i], self.cluster_word_frequency, self.opt), i) for i in indices]
+        self.dist_list = [(distance(self.data_x[i], self.cluster_word_frequency, self.opt), i) for i in indices]
         self.dist_list.sort()
 
     def make_cluster(self):
