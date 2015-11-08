@@ -2,6 +2,7 @@ import svm_driver as svm
 import helpers as h
 import au_helpers as au_h
 from distance import distance
+from math import sqrt
 
 phi = (1 + sqrt(5)) / 2
 grow_tol = 50 # window tolerance for gold_section_search to maximize positive delta
