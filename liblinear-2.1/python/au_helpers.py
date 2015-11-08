@@ -1,6 +1,7 @@
 """ Helper functions for the unlearning process """
 import copy
 from cluster import Cluster
+import helpers as h
 
 def cluster_au(au, gold=False):
     """Clusters the training space of an ActiveUnlearner and returns the list of clusters."""
@@ -12,7 +13,7 @@ def cluster_au(au, gold=False):
     pol_y = copy.deepcopy(au.pol_y)
     pol_x = copy.deepcopy(au.pol_x)
 
-    original_training_size = len(pol_y) + len(train_y)
+    original_training_size = len(data.strip(pol_y)) + len(data.strip(train_y))
 
     print "\nResetting mislabeled...\n"
     mislabeled = au.get_mislabeled(update=True) # gets an array of all false positives, false negatives
@@ -20,10 +21,11 @@ def cluster_au(au, gold=False):
 
     print "\n Clustering...\n"
     pre_cluster_rate = au.current_detection_rate
-    while len(pol_y) + len(train_y) > 0: # loop until all emails in phantom training space have been assigned
+    training_size = len(data.strip(pol_y)) + len(data.strip(train_y))
+    while training_size > 0: # loop until all emails in phantom training space have been assigned
         print "\n-----------------------------------------------------\n"
         remaining = len(pol_y) + len(train_y)
-        print "\n" + str(len(remaining)) + " emails out of " + str(original_training_size) + \
+        print "\n" + str(remaining) + " emails out of " + str(original_training_size) + \
               " still unclustered.\n"
 
         training = [train_y, train_x, pol_y, pol_x]
@@ -35,10 +37,6 @@ def cluster_au(au, gold=False):
         label = None
         while current_seed is None:
             label, init_pos, current_seed = au.select_initial(mislabeled, "weighted", training) 
-
-        assert None in training[0] + training[2]
-        
-        return
 
         if str(current_seed) == 'NO_CENTROIDS':
             cluster_result = cluster_remaining(au, training, impact=True) # TODO implement cluster_result
@@ -60,10 +58,9 @@ def cluster_au(au, gold=False):
         cluster_list.append([net_rate_change, cluster])
 
         print "\nRemoving cluster from shuffled training set...\n"
-        original_len = len(training)
-        for email in cluster.cluster_set: # remove emails from phantom training set so they are not assigned to other clusters
-            training.remove(email)
-        #print "\nTraining space is now at ", original_len, " --> ", len(training), " emails"
+
+        h.unlearn(training, cluster.cluster_set)
+        training_size = len(data.strip(pol_y)) + len(data.strip(train_y))
 
     cluster_list.sort() # sorts by net_rate_change
     print "\nClustering process done and sorted.\n"
@@ -84,44 +81,20 @@ def determine_cluster(center, au, label, init_pos, working_set=None, gold=False,
     # Test detection rate after unlearning cluster
     au.unlearn(cluster)
     au.init_ground()
-    new_detection_rate = au.driver.tester.correct_classification_rate()
+    new_detection_rate = au.current_detection_rate
 
     if new_detection_rate <= old_detection_rate:    # Detection rate worsens - Reject
-        if shrink_rejects and new_detection_rate < old_detection_rate -.5: # TODO TEST: arbitrary threshold of -.5% accuracy
-            print "Attempting to shrink the cluster ", cluster
-            if gold: #golden_section_search
-                pass
-                cluster = au.cluster_by_gold(cluster, old_detection_rate, new_detection_rate, counter, test_waters)
-            else: #incremental search
-                sys.exit("Let's use gold for now") # incremental shrink_rejects is not implemented
-            if impact: #include net_rate_change in return
-                au.learn(cluster) # relearn cluster in real training space so deltas of future cluster are not influenced
-                second_state_rate = au.current_detection_rate
-                assert(second_state_rate == new_detection_rate), str(second_state_rate) + " " + str(new_detection_rate)
-                net_rate_change = second_state_rate - first_state_rate
-                au.current_detection_rate = first_state_rate
-                return net_rate_change, cluster
-            else:
-                return cluster
+        print "\nCenter is inviable. " + str(new_detection_rate) + " < " + str(old_detection_rate) + "\n" 
+        print "relearning cluster... "
+        
+        au.learn(cluster)
 
-        else:
-            print "\nCenter is inviable. " + str(new_detection_rate) + " < " + str(old_detection_rate) + "\n" 
-            if pos_cluster_opt != 2:
-                print "relearning cluster... "
-                au.learn(cluster)
+        second_state_rate = new_detection_rate
+        net_rate_change = second_state_rate - first_state_rate
+        print "cluster rejected with a net rate change of ", second_state_rate, " - ", first_state_rate, " = ", net_rate_change
+        au.current_detection_rate = first_state_rate
 
-            second_state_rate = new_detection_rate
-            net_rate_change = second_state_rate - first_state_rate
-            print "cluster rejected with a net rate change of ", second_state_rate, " - ", first_state_rate, " = ", net_rate_change
-            au.current_detection_rate = first_state_rate
-            if pos_cluster_opt == 1:
-                return None
-
-            elif pos_cluster_opt == 2:
-                print "\nDecrementing until cluster is positive...\n"
-                return neg_cluster_decrementer(au, first_state_rate, cluster)
-
-            return net_rate_change, cluster
+        return net_rate_change, cluster
 
     elif cluster.size < au.increment:
         if impact:
@@ -132,16 +105,9 @@ def determine_cluster(center, au, label, init_pos, working_set=None, gold=False,
             print "no more emails to cluster, returning cluster of size ", cluster.size
             return net_rate_change, cluster
 
-        else:
-            return cluster
-
     else:   # Detection rate improves - Grow cluster
         if gold:
-            cluster = au.cluster_by_gold(cluster, old_detection_rate, new_detection_rate, counter, test_waters)
-
-        else:
-            cluster = au.cluster_by_increment(cluster, old_detection_rate, new_detection_rate, counter)
-
+            cluster = au.cluster_by_gold(cluster, old_detection_rate, new_detection_rate, counter)
         if impact: #include net_rate_change in return
             au.learn(cluster) # relearn cluster in real training space so deltas of future cluster are not influenced
             second_state_rate = au.current_detection_rate
@@ -150,5 +116,3 @@ def determine_cluster(center, au, label, init_pos, working_set=None, gold=False,
             au.current_detection_rate = first_state_rate
             return net_rate_change, cluster
 
-        else:
-            return cluster

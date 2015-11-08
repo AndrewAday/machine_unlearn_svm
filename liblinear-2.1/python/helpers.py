@@ -21,17 +21,34 @@ def delist(l):
     """ [[a], [b], [c]] --> [a,b,c] """
     return [e[0] for e in l]
 
-def update(working_set, i):
-    if i >= len(working_set[0]): # remove from pol, not train
-        i -= len(working_set[0])
-        working_set[2][i] = None
-        working_set[3][i] = None
-    else:
-        working_set[0][i] = None
-        working_set[1][i] = None
+def unlearn(working_set, indices):
+    for i in indices:
+        if i >= len(working_set[0]): # remove from pol, not train
+            i -= len(working_set[0])
+            working_set[2][i] = None
+            working_set[3][i] = None
+        else:
+            working_set[0][i] = None
+            working_set[1][i] = None
 
-def refresh(working_set, i):
-    pass
+def relearn(working_set, original, indices):
+    """ restores values of index i to the working set """
+    for i in indices:
+        if i >= len(working_set[0]): # remove from pol, not train
+            i -= len(working_set[0])
+            working_set[2][i] = original[2][i]
+            working_set[3][i] = original[3][i]
+        else:
+            working_set[0][i] = original[0][i]
+            working_set[1][i] = original[1][i]
+
+
+def strip(data):
+    """ Strip None from data """
+    data = [e for e in data if e is not None]
+    return data
+
+    
 
 
 def update_word_frequencies(current, new):

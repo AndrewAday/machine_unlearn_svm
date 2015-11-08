@@ -39,7 +39,7 @@ class Cluster:
         if separate: # if true, all emails must be same type (spam or ham) as centroid
             dist_list = []
             for x in range(len(self.data_y)):
-                if self.data_y[x] == self.label: # same type 
+                if self.data_y[x] == self.label and x != self.clustroid: # same type, no duplicate 
                     dist_list.append((distance(self.data_x[x], self.cluster_word_frequency, self.opt), x))
 
         dist_list.sort() # sorts tuples by first element default, the distance
