@@ -496,7 +496,7 @@ class ActiveUnlearner:
 
             print "Chose the mislabeled point with z = ", prob
 
-            data_y, data_x = h.compose(working_set)
+            data_y, data_x = h.compose_set(working_set)
 
             init_email = None
             init_pos = None
