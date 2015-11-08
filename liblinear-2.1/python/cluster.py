@@ -2,7 +2,7 @@ from distance import distance
 class Cluster:
     def __init__(self, msg, size, active_unlearner, label, distance_opt, 
                 working_set=None, separate=True):
-        
+        # Clustroid specs
         self.clustroid = msg[1] # index of msg
         self.label = label
         self.common_features = []
@@ -11,6 +11,7 @@ class Cluster:
         self.active_unlearner = active_unlearner # point to calling au instance
         self.opt = distance_opt
 
+        # The data
         self.working_set = working_set
         self.train_y = self.working_set[0]
         self.train_x = self.working_set[1]
@@ -76,13 +77,68 @@ class Cluster:
             print "-> cluster initialized with size", len(emails)
         return set(emails)
 
-    def divide(self):
+    def cluster_more(self, n):
+        """Expands the cluster to include n more emails and returns these additional emails.
+           If n more is not available, cluster size is simply truncated to include all remaining
+           emails."""
+        if 'frequency' in self.opt:
+            if n >= len(self.dist_list):
+                n = len(self.dist_list)
+            print "Adding ", n, " more emails to cluster of size ", self.size, " via ", self.opt,  " method"
+            self.size += n
+
+            new_elements = []
+            added = 0
+            while added < n:
+                d,i = self.dist_list.pop(0) # get nearest email
+                new_elements.append(i) # add to new list
+                self.added.append(i)
+                self.cluster_set.add(i) # add to original cluster set
+                self.cluster_word_frequency = helpers.update_word_frequencies(self.cluster_word_frequency, self.data_x[i]) # update word frequencies
+                self.update_dist_list()
+                added += 1
+            assert(len(new_elements) == n), str(len(new_elements)) + " " + str(n)
+            assert(len(self.cluster_set) == self.size), str(len(self.cluster_set)) + " " + str(self.size)
+            self.divide(new_elements)
+            return new_elements
+
+    def cluster_less(self, n):
+        """Contracts the cluster to include n less emails and returns the now newly excluded emails."""
+
+        old_cluster_set = self.cluster_set
+        self.size -= n
+        assert(self.size > 0), "Cluster size would become negative!"
+        if "frequency" in self.opt:
+            unlearned = 0
+            new_elements = []
+            while unlearned < n:
+                i = self.added.pop() # remove most recently added email
+                new_elements.append(i) # add index to new emails list
+                self.cluster_set.remove(i)
+                self.cluster_word_frequency = helpers.revert_word_frequencies(self.cluster_word_frequency, self.data_x[i]) # update word frequencies
+                self.dist_list.append((0, i))
+                unlearned += 1
+            self.update_dist_list()
+            assert(len(new_elements) == n), str(len(new_elements)) + " " + str(n)
+            assert(len(self.cluster_set) == self.size), str(len(self.cluster_set)) + " " + str(self.size)
+
+            self.divide(new_elements, rem=True)
+            return new_elements
+
+    def divide(self, new_elements=None, rem=False):
         """Divides messages in the cluster between spam and ham."""
-        for msg in self.cluster_set: # indices of added msgs
-            if self.data_y[msg] == -1:
-                self.ham.add(msg)
-            else:
-                self.spam.add(msg)
+        if new_elements is None:
+            for msg in self.cluster_set: # indices of added msgs
+                if self.data_y[msg] == -1:
+                    self.ham.add(msg) if rem else self.ham.remove(msg)
+                else:
+                    self.spam.add(msg) if rem else self.spam.remove(msg)
+        else:
+            for msg in self.new_elements:
+                if self.data_y[msg] == -1:
+                    self.ham.add(msg) if rem else self.ham.remove(msg)
+                else:
+                    self.spam.add(msg) if rem else self.spam.remove(msg)
 
     def target_spam(self):
         """Returns a count of the number of spam emails in the cluster."""
@@ -113,102 +169,3 @@ class Cluster:
         self.spam = spam_new
         self.ham = ham_new
         return self # return the cluster
-
-    def cluster_more(self, n):
-        """Expands the cluster to include n more emails and returns these additional emails.
-           If n more is not available, cluster size is simply truncated to include all remaining
-           emails."""
-        if 'frequency' in self.opt:
-            if n >= len(self.dist_list):
-                n = len(self.dist_list)
-            print "Adding ", n, " more emails to cluster of size ", self.size, " via ", self.opt,  " method"
-            self.size += n
-
-            new_elements = []
-            added = 0
-            while added < n:
-                d,i = self.dist_list.pop(0) # get nearest email
-                new_elements.append(nearest) # add to new list
-                self.added.append(nearest)
-                self.cluster_set.add(nearest) # add to original cluster set
-                self.cluster_word_frequency = helpers.update_word_frequencies(self.cluster_word_frequency, nearest) # update word frequencies
-                # self.dist_list = self.distance_array(self.separate) # update distance list w/ new frequency list
-                del self.dist_list[0]
-                self.update_dist_list()
-                added += 1
-            assert(len(new_elements) == n), str(len(new_elements)) + " " + str(n)
-            assert(len(self.cluster_set) == self.size), str(len(self.cluster_set)) + " " + str(self.size)
-            for msg in new_elements:
-                if msg.train == 1 or msg.train == 3:
-                    self.ham.add(msg)
-                elif msg.train == 0 or msg.train == 2:
-                    self.spam.add(msg)
-            return new_elements
-
-    def learn(self, n): # relearn only set.size elements. unlearning is too convoluted
-        print "-> relearning a cluster of size ", self.size, " via intersection method"
-        old_cluster_set = self.cluster_set
-        self.ham = set()
-        self.spam = set()
-        self.cluster_set = set()
-        self.dist_list = self.distance_array(self.separate)
-        self.cluster_set = self.make_cluster()
-        self.divide()
-        new_cluster_set = self.cluster_set
-        new_elements = list(item for item in old_cluster_set if item not in new_cluster_set)
-        assert(len(self.cluster_set) == self.size), str(len(self.cluster_set)) + " " + str(self.size)
-        assert(len(new_elements) == n), len(new_elements)        
-        return new_elements
-
-    def cluster_less(self, n):
-        """Contracts the cluster to include n less emails and returns the now newly excluded emails."""
-
-        old_cluster_set = self.cluster_set
-        self.size -= n
-        assert(self.size > 0), "Cluster size would become negative!"
-        if self.sort_first:
-            if self.opt == "intersection":
-                new_elements = self.learn(n)
-                return new_elements
-            elif "frequency" in self.opt:
-                unlearned = 0
-                new_elements = []
-                while unlearned < n:
-                    email = self.added.pop() # remove most recently added email
-                    new_elements.append(email) # add to new emails list
-                    self.cluster_set.remove(email)
-                    # self.working_set.append(email)
-                    self.cluster_word_frequency = helpers.revert_word_frequencies(self.cluster_word_frequency, email) # update word frequencies
-                    self.dist_list.append((0, email))
-                    unlearned += 1
-                #self.dist_list = self.distance_array(self.separate) 
-                self.update_dist_list()
-                assert(len(new_elements) == n), str(len(new_elements)) + " " + str(n)
-                assert(len(self.cluster_set) == self.size), str(len(self.cluster_set)) + " " + str(self.size)
-
-                for msg in new_elements:
-                    if msg.train == 1 or msg.train == 3:
-                        self.ham.remove(msg)
-                    elif msg.train == 0 or msg.train == 2:
-                        self.spam.remove(msg)
-
-                return new_elements
-            else:
-                new_cluster_set = set(item[1] for item in self.dist_list[:self.size])
-        else:
-            k_smallest = quickselect.k_smallest
-            new_cluster_set = set(item[1] for item in k_smallest(self.dist_list, self.size))
-
-        new_elements = list(item for item in old_cluster_set if item not in new_cluster_set)
-        self.cluster_set = new_cluster_set
-
-        assert(len(self.cluster_set) == self.size), str(len(self.cluster_set)) + " " + str(self.size)
-        assert(len(new_elements) == n), len(new_elements)        
-
-        for msg in new_elements:
-            if msg.train == 1 or msg.train == 3:
-                self.ham.remove(msg)
-            elif msg.train == 0 or msg.train == 2:
-                self.spam.remove(msg)
-
-        return new_elements
