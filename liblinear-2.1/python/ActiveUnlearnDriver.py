@@ -492,10 +492,9 @@ class ActiveUnlearner:
             return (None, 'NO_CENTROIDS')
         else:
             prob, mislabeled_point = mislabeled.pop(0) # Choose most potent mislabeled email 
-            self.mislabeled_chosen.add(mislabeled_point)
+            self.mislabeled_chosen.append(mislabeled_point)
 
             print "Chose the mislabeled point with z = ", prob
-            print mislabeled_point
 
             data_y, data_x = h.compose(working_set)
 
