@@ -48,9 +48,6 @@ def strip(data):
     data = [e for e in data if e is not None]
     return data
 
-    
-
-
 def update_word_frequencies(current, new):
     new_word_vector = _vectorize(new)
     for word in new_word_vector:
@@ -73,3 +70,16 @@ def get_word_frequencies(msg):
 
 def _vectorize(email):
     return [k for k in email if email[k] == 1]
+
+def cluster_print_stats(outfile, pollution_set3, detection_rate, cluster, cluster_count, attempt_count):
+    """Prints stats for a given unlearned cluster and the present state of the machine after unlearning."""
+    if outfile is not None:
+        if pollution_set3:
+            outfile.write(str(cluster_count) + ", " + str(attempt_count) + ": " + str(detection_rate) + ", " +
+                          str(cluster[1].size) + ", " + str(cluster[1].target_set3()) + "\n")
+
+        else:
+            outfile.write(str(cluster_count) + ", " + str(attempt_count) + ": " + str(detection_rate) + ", " +
+                          str(cluster[1].size) + ", " + str(cluster[1].target_set4()) + "\n")
+        outfile.flush()
+        os.fsync(outfile)

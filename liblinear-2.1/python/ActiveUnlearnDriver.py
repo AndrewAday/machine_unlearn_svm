@@ -425,14 +425,10 @@ class ActiveUnlearner:
                 print "\nOriginal increase in detection rate is ", cluster[0]
                 j += 1
                 old_detection_rate = detection_rate
-                
-                # if pos_cluster_opt == 3 and self.greedy:
-                #     if cluster[0] <= 0:
-                #         continue
 
                 self.unlearn(cluster[1]) # unlearn the cluster
                 self.init_ground(update=True) # find new accuracy, update the cached training space
-                detection_rate = self.driver.tester.correct_classification_rate()
+                detection_rate = self.current_detection_rate
                 if detection_rate > old_detection_rate: # if improved, record stats
                     cluster_count += 1 # number of unlearned clusters
                     unlearned_cluster_list.append(cluster)
@@ -449,7 +445,7 @@ class ActiveUnlearner:
 
             else: # do the whole process again, this time with the training space - unlearned clusters
                 del cluster_list
-                cluster_list = cluster_au(self, gold, pos_cluster_opt=pos_cluster_opt,shrink_rejects=shrink_rejects)
+                cluster_list = cluster_au(self, gold)
                 attempt_count += 1
                 gc.collect()
 

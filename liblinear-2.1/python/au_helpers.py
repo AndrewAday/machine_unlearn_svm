@@ -3,7 +3,7 @@ import copy
 from cluster import Cluster
 import helpers as h
 
-def cluster_au(au, gold=False):
+def cluster_au(au, gold=True):
     """Clusters the training space of an ActiveUnlearner and returns the list of clusters."""
     
     print "\n----------------------Beginning the Clustering Process-----------------------\n"
@@ -24,8 +24,7 @@ def cluster_au(au, gold=False):
     training_size = len(data.strip(pol_y)) + len(data.strip(train_y))
     while training_size > 0: # loop until all emails in phantom training space have been assigned
         print "\n-----------------------------------------------------\n"
-        remaining = len(pol_y) + len(train_y)
-        print "\n" + str(remaining) + " emails out of " + str(original_training_size) + \
+        print "\n" + str(training_size) + " emails out of " + str(original_training_size) + \
               " still unclustered.\n"
 
         training = [train_y, train_x, pol_y, pol_x]
