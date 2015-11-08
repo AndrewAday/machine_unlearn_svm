@@ -1,5 +1,6 @@
 from distance import distance
 import helpers as h
+import time
 class Cluster:
     def __init__(self, msg, size, active_unlearner, label, distance_opt, 
                 working_set=None, separate=True):
@@ -46,16 +47,21 @@ class Cluster:
         dist_list.sort() # sorts tuples by first element default, the distance
 
         print "\n ----------------Generated Distance Array----------------\n"
-        print [email[0] for email in dist_list[:5]]
-        print [email[1] for email in dist_list[:5]]
+        print "Distance: ", [email[0] for email in dist_list[:5]]
+        print "Indices: ", [email[1] for email in dist_list[:5]]
 
         return dist_list
 
-    def update_dist_list(self, separate=True): 
+    def update_dist_list(self, t=False): 
         """Updates self.dist_list for the frequency method"""
+        if t:
+            time_1 = time.time()
         indices = [train[1] for train in self.dist_list] # get array of indices
         self.dist_list = [(distance(self.data_x[i], self.cluster_word_frequency, self.opt), i) for i in indices]
         self.dist_list.sort()
+        if t:
+            time_2 = time.time()
+            print 'update_dist_list took: ', h.sec_to_english(time_2 - time_1)
 
     def make_cluster(self):
         """Constructs the initial cluster of emails."""
@@ -73,11 +79,16 @@ class Cluster:
                 d,i = self.dist_list.pop(0) # get nearest email
                 emails.append(i) # add to list
                 self.added.append(i) # track order in which emails are added
-                self.cluster_word_frequency = h.update_word_frequencies(self.cluster_word_frequency, self.data_x[i]) # update word frequencies
-                self.update_dist_list() # new cluster_word_frequency, so need to resort closest emails
-                current_size += 1
                 if current_size % 10 == 0:
                     print current_size, "/", self.size
+                    self.cluster_word_frequency = h.update_word_frequencies(self.cluster_word_frequency, self.data_x[i], t=True) # update word frequencies
+                    self.update_dist_list(t=True)
+                else:
+                    self.cluster_word_frequency = h.update_word_frequencies(self.cluster_word_frequency, self.data_x[i]) # update word frequencies
+                    self.update_dist_list()
+                 # new cluster_word_frequency, so need to resort closest emails
+                current_size += 1
+                
             print "-> cluster initialized with size", len(emails)
         return set(emails)
 

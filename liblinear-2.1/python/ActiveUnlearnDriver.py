@@ -505,11 +505,12 @@ class ActiveUnlearner:
             if "frequency" in self.distance_opt:
                 min_distance = sys.maxint
                 for i,email in enumerate(data_x):
-                    current_distance = distance(email, mislabeled_point, self.distance_opt)
-                    if current_distance < min_distance:
-                        init_email = email
-                        init_pos = i
-                        min_distance = current_distance
+                    if email is not None:
+                        current_distance = distance(email, mislabeled_point, self.distance_opt)
+                        if current_distance < min_distance:
+                            init_email = email
+                            init_pos = i
+                            min_distance = current_distance
 
             if init_email is None:
                 print "Training emails remaining: ", len(data_x)
