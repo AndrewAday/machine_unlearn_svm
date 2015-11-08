@@ -1,4 +1,5 @@
 from distance import distance
+import helpers as h
 class Cluster:
     def __init__(self, msg, size, active_unlearner, label, distance_opt, 
                 working_set=None, separate=True):
