@@ -1,4 +1,4 @@
-from distance import distance
+from distance import distance, vectorize_set
 import helpers as h
 import time
 class Cluster:
@@ -20,6 +20,9 @@ class Cluster:
         self.pol_y = self.working_set[2]
         self.pol_x = self.working_set[3]
         self.data_y, self.data_x = h.compose_set(self.working_set)
+        time_1 = time.time()
+        self.vec_data_x = vectorize_set(self.data_x)
+        print 'Vectorizing data_x took: ', h.sec_to_english(time.time() - time_1)
 
         self.ham = set()
         self.spam = set()
@@ -42,7 +45,7 @@ class Cluster:
             dist_list = []
             for x in range(len(self.data_y)):
                 if self.data_y[x] == self.label and x != self.clustroid: # same type, no duplicate 
-                    dist_list.append((distance(self.data_x[x], self.cluster_word_frequency, self.opt), x))
+                    dist_list.append((distance(self.vec_data_x[x], self.cluster_word_frequency, self.opt), x))
 
         dist_list.sort() # sorts tuples by first element default, the distance
 
@@ -57,7 +60,12 @@ class Cluster:
         if t:
             time_1 = time.time()
         indices = [train[1] for train in self.dist_list] # get array of indices
-        self.dist_list = [(distance(self.data_x[i], self.cluster_word_frequency, self.opt), i) for i in indices]
+        if t:
+            time_3 = time.time()
+        self.dist_list = [(distance(self.vec_data_x[i], self.cluster_word_frequency, self.opt), i) for i in indices]
+        if t:
+            time_4 = time.time()
+            print "generating the dist_list took: ", h.sec_to_english(time_4 - time_3)
         self.dist_list.sort()
         if t:
             time_2 = time.time()
