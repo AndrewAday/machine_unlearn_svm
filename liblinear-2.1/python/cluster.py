@@ -72,7 +72,7 @@ class Cluster:
                 d,i = self.dist_list.pop(0) # get nearest email
                 emails.append(i) # add to list
                 self.added.append(i) # track order in which emails are added
-                self.cluster_word_frequency = helpers.update_word_frequencies(self.cluster_word_frequency, self.data_x[i]) # update word frequencies
+                self.cluster_word_frequency = h.update_word_frequencies(self.cluster_word_frequency, self.data_x[i]) # update word frequencies
                 self.update_dist_list() # new cluster_word_frequency, so need to resort closest emails
                 current_size += 1
             print "-> cluster initialized with size", len(emails)
@@ -95,7 +95,7 @@ class Cluster:
                 new_elements.append(i) # add to new list
                 self.added.append(i)
                 self.cluster_set.add(i) # add to original cluster set
-                self.cluster_word_frequency = helpers.update_word_frequencies(self.cluster_word_frequency, self.data_x[i]) # update word frequencies
+                self.cluster_word_frequency = h.update_word_frequencies(self.cluster_word_frequency, self.data_x[i]) # update word frequencies
                 self.update_dist_list()
                 added += 1
             assert(len(new_elements) == n), str(len(new_elements)) + " " + str(n)
@@ -116,7 +116,7 @@ class Cluster:
                 i = self.added.pop() # remove most recently added email
                 new_elements.append(i) # add index to new emails list
                 self.cluster_set.remove(i)
-                self.cluster_word_frequency = helpers.revert_word_frequencies(self.cluster_word_frequency, self.data_x[i]) # update word frequencies
+                self.cluster_word_frequency = h.revert_word_frequencies(self.cluster_word_frequency, self.data_x[i]) # update word frequencies
                 self.dist_list.append((0, i))
                 unlearned += 1
             self.update_dist_list()
