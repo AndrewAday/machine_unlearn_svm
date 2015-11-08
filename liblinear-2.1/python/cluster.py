@@ -82,13 +82,10 @@ class Cluster:
                 d,i = self.dist_list.pop(0) # get nearest email
                 emails.append(i) # add to list
                 self.added.append(i) # track order in which emails are added
+                self.cluster_word_frequency = h.update_word_frequencies(self.cluster_word_frequency, self.data_x[i]) # update word frequencies
+                self.update_dist_list()
                 if current_size % 10 == 0:
                     print current_size, "/", self.size
-                    self.cluster_word_frequency = h.update_word_frequencies(self.cluster_word_frequency, self.data_x[i], t=True) # update word frequencies
-                    self.update_dist_list(t=True)
-                else:
-                    self.cluster_word_frequency = h.update_word_frequencies(self.cluster_word_frequency, self.data_x[i]) # update word frequencies
-                    self.update_dist_list()
                  # new cluster_word_frequency, so need to resort closest emails
                 current_size += 1
                 
@@ -149,12 +146,12 @@ class Cluster:
         """Divides messages in the cluster between spam and ham."""
         if new_elements is None:
             for msg in self.cluster_set: # indices of added msgs
-                if self.data_y[msg] == -1:
+                if self.data_y[msg] == -1: # -1 indicates msg is ham
                     self.ham.add(msg) if not rem else self.ham.remove(msg)
                 else:
                     self.spam.add(msg) if not rem else self.spam.remove(msg)
         else:
-            for msg in self.new_elements:
+            for msg in new_elements:
                 if self.data_y[msg] == -1:
                     self.ham.add(msg) if not rem else self.ham.remove(msg)
                 else:

@@ -2,7 +2,7 @@ import sys
 import svm_driver as svm
 import helpers as h
 import au_helpers as au_h
-from distance import distance
+from distance import distance, vectorize_set
 from math import sqrt
 
 phi = (1 + sqrt(5)) / 2
@@ -498,15 +498,16 @@ class ActiveUnlearner:
             print "Chose the mislabeled point with z = ", prob
 
             data_y, data_x = h.compose_set(working_set)
+            vec_data_x = vectorize_set(data_x)
 
             init_email = None
             init_pos = None
             label = None
             if "frequency" in self.distance_opt:
                 min_distance = sys.maxint
-                for i,email in enumerate(data_x):
-                    if email is not None:
-                        current_distance = distance(email, mislabeled_point, self.distance_opt)
+                for i,email_indices in enumerate(vec_data_x):
+                    if None not in email_indices: # actual data
+                        current_distance = distance(email_indices, mislabeled_point, self.distance_opt)
                         if current_distance < min_distance:
                             init_email = email
                             init_pos = i
