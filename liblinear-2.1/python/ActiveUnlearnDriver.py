@@ -509,7 +509,7 @@ class ActiveUnlearner:
                     if None not in email_indices: # actual data
                         current_distance = distance(email_indices, mislabeled_point, self.distance_opt)
                         if current_distance < min_distance:
-                            init_email = email
+                            init_email = data_x[i]
                             init_pos = i
                             min_distance = current_distance
 
