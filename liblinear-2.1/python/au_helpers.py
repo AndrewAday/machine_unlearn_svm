@@ -19,7 +19,6 @@ def cluster_au(au, gold=False):
     au.mislabeled_chosen = [] # reset set of clustered mislabeled emails in this instance of au
 
     print "\n Clustering...\n"
-    original_training_size = training_size
     pre_cluster_rate = au.current_detection_rate
     while len(pol_y) + len(train_y) > 0: # loop until all emails in phantom training space have been assigned
         print "\n-----------------------------------------------------\n"

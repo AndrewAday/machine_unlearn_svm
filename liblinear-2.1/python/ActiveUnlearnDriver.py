@@ -590,17 +590,17 @@ class ActiveUnlearner:
         if update:
             self.init_ground()
         # find indices where pred != actual
-        assert len(self.p_val) == len(self.test_y), \
+        assert len(self.p_label) == len(self.test_y), \
             "self.p_val length: %r != self.test_y length: %r" % (len(self.p_val), len(self.test_y))
         mis_indices = []
         for x in range(len(self.p_val)):
-            if self.p_val[x] != self.test_y[x]:
+            if self.p_label[x] != self.test_y[x]:
                 mis_indices.append(x)
 
         mislabeled = [(self.p_val[i], self.test_x[i]) for i in mis_indices] # (p_val, data vector)
         mislabeled.sort(key=lambda x: abs(x[0]), reverse=True) # sort in descending order
         print "Generated mislabeled list of length: ", len(mislabeled)
-        print mislabeled[:5] 
+        print [e[0] for e in mislabeled[:5]]
         
         return mislabeled
 
@@ -646,4 +646,3 @@ class ActiveUnlearner:
             h.update(working_set, init_pos) # set None the values where selected
             assert None in working_set[0] + working_set[2]
             return (label, init_pos, init_email)
-            

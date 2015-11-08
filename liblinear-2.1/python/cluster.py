@@ -127,7 +127,7 @@ class Cluster:
             new_elements = []
             added = 0
             while added < n:
-                nearest = self.dist_list[0][1] # get nearest email
+                d,i = self.dist_list.pop(0) # get nearest email
                 new_elements.append(nearest) # add to new list
                 self.added.append(nearest)
                 self.cluster_set.add(nearest) # add to original cluster set
@@ -143,35 +143,7 @@ class Cluster:
                     self.ham.add(msg)
                 elif msg.train == 0 or msg.train == 2:
                     self.spam.add(msg)
-            return new_elements 
-
-        old_cluster_set = self.cluster_set
-        if self.size + n <= len(self.dist_list):
-            self.size += n
-
-        else:
-            print "\nTruncating cluster size...\n"
-            if len(self.dist_list) > 0:
-                self.size = len(self.dist_list)
-
-        if self.sort_first:
-            new_cluster_set = set(item[1] for item in self.dist_list[:self.size])
-        else:
-            k_smallest = quickselect.k_smallest
-            new_cluster_set = set(item[1] for item in k_smallest(self.dist_list, self.size))
-
-        new_elements = list(item for item in new_cluster_set if item not in old_cluster_set)
-        self.cluster_set = new_cluster_set
-
-        assert(len(self.cluster_set) == self.size), len(self.cluster_set)
-
-        for msg in new_elements:
-            if msg.train == 1 or msg.train == 3:
-                self.ham.add(msg)
-            elif msg.train == 0 or msg.train == 2:
-                self.spam.add(msg)
-
-        return new_elements
+            return new_elements
 
     def learn(self, n): # relearn only set.size elements. unlearning is too convoluted
         print "-> relearning a cluster of size ", self.size, " via intersection method"
