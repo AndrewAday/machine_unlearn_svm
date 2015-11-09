@@ -64,6 +64,7 @@ class ActiveUnlearner:
         self.current_detection_rate = p_acc[0]
 
     def update_originals(self):
+        print "----Updating Originals----"
         self.o_train_y = copy.deepcopy(self.train_y)
         self.o_train_x = copy.deepcopy(self.train_x)
         self.o_pol_y = copy.deepcopy(self.pol_y)
@@ -93,7 +94,7 @@ class ActiveUnlearner:
         print "Is relearned train_y same as o_train_y after relearning?", self.train_y == self.o_train_y
         print "Is relearned train_x same as o_train_x after relearning?", self.train_x == self.o_train_x
         
-        if self.train_x == self.o_train_x: # let's log the indices where it's not the same
+        if self.train_x != self.o_train_x: # let's log the indices where it's not the same
             diff = []
             for i in range(len(self.train_x)):
                 if self.train_x[i] != self.o_train_x[i]:
