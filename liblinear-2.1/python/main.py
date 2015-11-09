@@ -81,7 +81,7 @@ def unlearn_stats(au, outfile, train_y, train_x, pol_y, pol_x, test_y, test_x, t
         if noisy_clusters:
             if vanilla is not None:
                 # get list of clusters with 0 polluted emails, but unlearning still improves classification accuracy
-                noise = noisy_data_check(find_pure_clusters(cluster_list), vanilla[1]) #vanilla[1] is the v_au instance
+                noise = noisy_data_check(find_pure_clusters(cluster_list), vanilla) #vanilla[1] is the v_au instance
                 for cluster in noise:
                     total_noisy_unlearned += cluster.size
                 outfile.write("Percentage of Noisy Data in Unpolluted Unlearned:\n")
