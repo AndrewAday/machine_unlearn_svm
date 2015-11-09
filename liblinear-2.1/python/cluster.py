@@ -164,7 +164,7 @@ class Cluster:
     def target_set3(self):
         """Returns a count of the number of Set3 emails in the cluster."""
         counter = 0
-        for i in self.cluster_set:
+        for msg in self.cluster_set:
             if msg >= len(self.train_y):
                 counter += 1
         return counter
