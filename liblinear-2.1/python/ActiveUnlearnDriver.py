@@ -25,7 +25,7 @@ class ActiveUnlearner:
         self.pol_x = pol_x
 
         self.o_train_y = copy.deepcopy(self.train_y)
-        self.o_train_x = copy.deepcopy(eslf.train_x)
+        self.o_train_x = copy.deepcopy(self.train_x)
 
         # Testing Data
         self.test_y = test_y
