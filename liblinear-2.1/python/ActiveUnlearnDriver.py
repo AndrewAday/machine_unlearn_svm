@@ -73,54 +73,6 @@ class ActiveUnlearner:
             cluster.divide()
 
         h.relearn([self.train_y, self.train_x, self.pol_y, self.pol_x], cluster.working_set, cluster.cluster_set)
-        
-
-
-    # --------------------------------------------------------------------------------------------------------------
-
-    def detect_rate(self, cluster):
-        """Returns the detection rate if a given cluster is unlearned.
-        Relearns the cluster afterwards.
-        """
-        self.unlearn(cluster)
-        self.init_ground()
-        detection_rate = self.driver.tester.correct_classification_rate()
-        self.learn(cluster)
-        return detection_rate
-
-    def start_detect_rate(self, cluster):
-        """Determines the detection rate after unlearning an initial cluster."""
-        self.unlearn(cluster)
-        self.init_ground()
-        detection_rate = self.driver.tester.correct_classification_rate()
-        return detection_rate
-
-    def continue_detect_rate(self, cluster, n):
-        """Determines the detection rate after growing a cluster to be unlearned."""
-        old_cluster = copy.deepcopy(cluster.cluster_set)
-        cluster.cluster_more(n)
-        new_cluster = cluster.cluster_set
-
-        new_unlearns = new_cluster - old_cluster
-        assert(len(new_unlearns) == len(new_cluster) - len(old_cluster))
-        assert(len(new_unlearns) == n), len(new_unlearns)
-
-        unlearn_hams = []
-        unlearn_spams = []
-
-        for unlearn in new_unlearns:
-            if unlearn.train == 1 or unlearn.train == 3:
-                unlearn_hams.append(unlearn)
-
-            elif unlearn.train == 0 or unlearn.train == 2:
-                unlearn_spams.append(unlearn)
-
-            self.driver.tester.train_examples[unlearn.train].remove(unlearn)
-
-        self.driver.untrain(unlearn_hams, unlearn_spams)
-        self.init_ground()
-        detection_rate = self.driver.tester.correct_classification_rate()
-        return detection_rate
 
     # --------------------------------------------------------------------------------------------------------------
 
@@ -195,7 +147,7 @@ class ActiveUnlearner:
 
             self.divide_new_elements(new_unlearns, True) # unlearns the newly added elements
             self.init_ground() # rerun test to find new classification accuracy
-            new_detection_rate = self.driver.tester.correct_classification_rate()
+            new_detection_rate = self.current_detection_rate
 
         sizes.append(cluster.size) # array of all cluster sizes
         detection_rates.append(new_detection_rate) # array of all classification rates
@@ -273,7 +225,7 @@ class ActiveUnlearner:
             raise AssertionError("Pointer is at the midpoint of the window.")
 
         self.init_ground()
-        detection_rate = self.driver.tester.correct_classification_rate()
+        detection_rate = self.current_detection_rate
         iterations += 1
 
         return cluster, detection_rate, iterations
@@ -305,7 +257,7 @@ class ActiveUnlearner:
             assert(cluster.size == pointer), cluster.size
             self.divide_new_elements(new_relearns, False, cluster.working_set)
             self.init_ground()
-            rate_1 = self.driver.tester.correct_classification_rate()
+            rate_1 = self.current_detection_rate
             f[middle_1] = rate_1
 
         elif pointer < middle_1:
@@ -314,7 +266,7 @@ class ActiveUnlearner:
         else:
             assert(cluster.size == pointer), cluster.size
             self.init_ground()
-            rate_1 = self.driver.tester.correct_classification_rate()
+            rate_1 = self.current_detection_rate
             if middle_1 in f:
                 raise AssertionError("Key should not have been in f.")
 
@@ -332,7 +284,7 @@ class ActiveUnlearner:
             assert(cluster.size == pointer), cluster.size
             self.divide_new_elements(new_unlearns, True)
             self.init_ground()
-            rate_2 = self.driver.tester.correct_classification_rate()
+            rate_2 = self.current_detection_rate
             f[middle_2] = rate_2
 
         elif pointer > middle_2:
