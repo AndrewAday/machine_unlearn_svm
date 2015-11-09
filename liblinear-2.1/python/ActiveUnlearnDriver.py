@@ -5,6 +5,7 @@ import au_helpers as au_h
 from distance import distance, vectorize_set
 from math import sqrt
 import gc
+import copy
 phi = (1 + sqrt(5)) / 2
 grow_tol = 50 # window tolerance for gold_section_search to maximize positive delta
 shrink_tol = 10 # window tolerance for golden_section_search to minize negative delta
@@ -22,6 +23,9 @@ class ActiveUnlearner:
         self.train_x = train_x
         self.pol_y = pol_y
         self.pol_x = pol_x
+
+        self.o_train_y = copy.deepcopy(self.train_y)
+        self.o_train_x = copy.deepcopy(eslf.train_x)
 
         # Testing Data
         self.test_y = test_y
@@ -73,6 +77,8 @@ class ActiveUnlearner:
             cluster.divide()
 
         h.relearn([self.train_y, self.train_x, self.pol_y, self.pol_x], cluster.working_set, cluster.cluster_set)
+        print "Is relearned train_y same as o_train_y? ", self.train_y == self.o_train_y
+        print "Is relearned train_x same as o_train_x? ", self.train_x == self.o_train_x
 
     # --------------------------------------------------------------------------------------------------------------
 
