@@ -388,7 +388,7 @@ class ActiveUnlearner:
 
             else: # do the whole process again, this time with the training space - unlearned clusters
                 del cluster_list
-                cluster_list = cluster_au(self, gold)
+                cluster_list = au_h.cluster_au(self, gold=gold)
                 attempt_count += 1
                 gc.collect()
 
