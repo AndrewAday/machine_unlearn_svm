@@ -96,7 +96,7 @@ class ActiveUnlearner:
         if self.train_x == self.o_train_x: # let's log the indices where it's not the same
             diff = []
             for i in range(len(self.train_x)):
-                if self.train[i] != self.o_train_x[i]:
+                if self.train_x[i] != self.o_train_x[i]:
                     diff.append(i)
         print "Cluster set indicies: ", cluster.cluster_set
         print "Disparities after relearning: ", diff
