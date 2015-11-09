@@ -370,13 +370,13 @@ class ActiveUnlearner:
                 old_detection_rate = detection_rate
 
                 self.unlearn(cluster[1]) # unlearn the cluster
-                self.init_ground(update=True) # find new accuracy, update the cached training space
+                self.init_ground() # find new accuracy, update the cached training space
                 detection_rate = self.current_detection_rate
                 if detection_rate > old_detection_rate: # if improved, record stats
                     cluster_count += 1 # number of unlearned clusters
                     unlearned_cluster_list.append(cluster)
                     self.current_detection_rate = detection_rate
-                    cluster_print_stats(outfile, pollution_set3, detection_rate, cluster, cluster_count, attempt_count)
+                    h.cluster_print_stats(outfile, pollution_set3, detection_rate, cluster, cluster_count, attempt_count)
                     print "\nCurrent detection rate achieved is " + str(detection_rate) + ".\n"
 
                 else:
