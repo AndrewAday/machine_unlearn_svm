@@ -86,33 +86,48 @@ def determine_cluster(center, au, label, init_pos, working_set=None, gold=False,
         print "\nCenter is inviable. " + str(new_detection_rate) + " < " + str(old_detection_rate) + "\n" 
         print "relearning cluster... "
         
-        au.learn(cluster)
-
+        # Calculate delta in classification rate
         second_state_rate = new_detection_rate
         net_rate_change = second_state_rate - first_state_rate
         print "cluster rejected with a net rate change of ", second_state_rate, " - ", first_state_rate, " = ", net_rate_change
-        au.current_detection_rate = first_state_rate
+
+        # Relearn the cluster and assert classification accuracy has returned to normal
+        au.learn(cluster)
+        au.init_ground()
+        detection_rate = au.current_detection_rate
+        assert detection_rate == first_state_rate,\
+             "detection rate %r != old detection rate %r" % (detection_rate, first_state_rate)
 
         return net_rate_change, cluster
 
     elif cluster.size < au.increment:
         if impact:
+            # Relearn the cluster and assert classification accuracy has returned to normal
             au.learn(cluster)
+            au.init_ground()
+            detection_rate = au.current_detection_rate
+            assert detection_rate == first_state_rate,\
+                 "detection rate %r != old detection rate %r" % (detection_rate, first_state_rate)
+
             second_state_rate = new_detection_rate
             net_rate_change = second_state_rate - first_state_rate
-            au.current_detection_rate = first_state_rate
-            print "no more emails to cluster, returning cluster of size ", cluster.size
+            print "no more emails to cluster, returning cluster of size ", cluster.size, " and net rate change: ", net_rate_change
             return net_rate_change, cluster
 
     else:   # Detection rate improves - Grow cluster
         if gold:
             cluster = au.cluster_by_gold(cluster, old_detection_rate, new_detection_rate, counter)
         if impact: #include net_rate_change in return
-            au.learn(cluster) # relearn cluster in real training space so deltas of future cluster are not influenced
             second_state_rate = au.current_detection_rate
             net_rate_change = second_state_rate - first_state_rate
             print "cluster found with a net rate change of ", second_state_rate, " - ", first_state_rate, " = ", net_rate_change
-            au.current_detection_rate = first_state_rate
+
+            # Relearn the cluster and assert classification accuracy has returned to normal
+            au.learn(cluster)
+            au.init_ground()
+            detection_rate = au.current_detection_rate
+            assert detection_rate == first_state_rate,\
+                 "detection rate %r != old detection rate %r" % (detection_rate, first_state_rate)
             return net_rate_change, cluster
 
 def cluster_remaining(au, working_set):

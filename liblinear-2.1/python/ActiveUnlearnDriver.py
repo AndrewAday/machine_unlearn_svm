@@ -375,13 +375,15 @@ class ActiveUnlearner:
                 if detection_rate > old_detection_rate: # if improved, record stats
                     cluster_count += 1 # number of unlearned clusters
                     unlearned_cluster_list.append(cluster)
-                    self.current_detection_rate = detection_rate
                     h.cluster_print_stats(outfile, pollution_set3, detection_rate, cluster, cluster_count, attempt_count)
                     print "\nCurrent detection rate achieved is " + str(detection_rate) + ".\n"
 
                 else:
                     self.learn(cluster[1]) # else relearn cluster and move to the next one
-                    detection_rate = old_detection_rate
+                    self.init_ground()
+                    detection_rate = self.current_detection_rate
+                    assert detection_rate == old_detection_rate,\
+                         "detection rate %r != old detection rate %r" % (detection_rate, old_detection_rate)
 
             if detection_rate > self.threshold:
                 break
@@ -392,6 +394,7 @@ class ActiveUnlearner:
                 attempt_count += 1
                 gc.collect()
 
+        self.init_ground()
         return cluster_count, attempt_count
 
     # -----------------------------------------------------------------------------------
