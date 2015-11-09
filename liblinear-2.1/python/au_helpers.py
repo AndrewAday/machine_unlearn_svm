@@ -38,7 +38,7 @@ def cluster_au(au, gold=True):
             label, init_pos, current_seed = au.select_initial(mislabeled, "weighted", training) 
 
         if str(current_seed) == 'NO_CENTROIDS':
-            cluster_result = cluster_remaining(au, training) # TODO implement cluster_result
+            cluster_result = cluster_remaining(au, training)
         else:
             cluster_result = determine_cluster(current_seed, au, label, init_pos, working_set=training, gold=gold) # if true, relearn clusters after returning them
         if cluster_result is None:
@@ -63,7 +63,7 @@ def cluster_au(au, gold=True):
 
     cluster_list.sort() # sorts by net_rate_change
     print "\nClustering process done and sorted.\n"
-    return cluster_list 
+    return cluster_list
 
 def determine_cluster(center, au, label, init_pos, working_set=None, gold=False, impact=True):
     """Given a chosen starting center and a given increment of cluster size, it continues to grow and cluster more
