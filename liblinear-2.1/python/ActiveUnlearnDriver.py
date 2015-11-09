@@ -86,12 +86,10 @@ class ActiveUnlearner:
         print "Is relearned train_y same as o_train_y before relearning?", self.train_y == self.o_train_y
         print "Is relearned train_x same as o_train_x before relearning? ", self.train_x == self.o_train_x
 
-        print "Is cluster.working_set the same as o_train_y?", self.o_train_y == cluster.working_set[0]
-        print "Is cluster.working_set the same as o_train_x?", self.o_train_x == cluster.working_set[1]
-
-        h.relearn([self.train_y, self.train_x, self.pol_y, self.pol_x], cluster.working_set, cluster.cluster_set)
-        print "THIS IS NEW TRAIN_Y:", self.train_y
-        print "THIS IS NEW O_TRAIN_Y:", self.o_train_y
+        h.relearn([self.train_y, self.train_x, self.pol_y, self.pol_x],\
+                  [self.o_train_y, self.o_train_x, self.o_pol_y, self.o_pol_x], cluster.cluster_set)
+        # print "THIS IS NEW TRAIN_Y:", self.train_y
+        # print "THIS IS NEW O_TRAIN_Y:", self.o_train_y
         print "Is relearned train_y same as o_train_y after relearning?", self.train_y == self.o_train_y
         print "Is relearned train_x same as o_train_x after relearning?", self.train_x == self.o_train_x
         
@@ -373,7 +371,7 @@ class ActiveUnlearner:
                 print "\nChecking cluster " + str(j + 1) + " of " + str(list_length) + "...\n"
                 print "\nOriginal increase in detection rate is ", cluster[0]
                 j += 1
-                old_detection_rate = detection_rate
+                old_detection_rate = self.current_detection_rate
 
                 self.unlearn(cluster[1]) # unlearn the cluster
                 self.init_ground() # find new accuracy, update the cached training space
@@ -392,6 +390,7 @@ class ActiveUnlearner:
                     # assert detection_rate == old_detection_rate,\
                     #      "detection rate %r != old detection rate %r" % (detection_rate, old_detection_rate)
 
+            self.update_originals()
             if detection_rate > self.threshold:
                 break
 
