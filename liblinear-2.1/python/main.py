@@ -80,7 +80,7 @@ def unlearn_stats(au, outfile, train_y, train_x, pol_y, pol_x, test_y, test_x, t
         if noisy_clusters:
             if vanilla is not None:
                 # get list of clusters with 0 polluted emails, but unlearning still improves classification accuracy
-                noise = noisy_data_check(find_pure_clusters(cluster_list, ps_3=pollution_set3), vanilla[1]) #vanilla[1] is the v_au instance
+                noise = noisy_data_check(find_pure_clusters(cluster_list), vanilla[1]) #vanilla[1] is the v_au instance
                 for cluster in noise:
                     total_noisy_unlearned += cluster.size
                 outfile.write("Percentage of Noisy Data in Unpolluted Unlearned:\n")
@@ -95,19 +95,11 @@ def unlearn_stats(au, outfile, train_y, train_x, pol_y, pol_x, test_y, test_x, t
             return cluster_list
 
 
-def find_pure_clusters(cluster_list, ps_3):
+def find_pure_clusters(cluster_list):
     pure_clusters = []
     for cluster in cluster_list:
         cluster = cluster[1]
-        if ps_3:
-            pure_clusters.append(cluster.target_set3_get_unpolluted())
-            # if cluster.target_set3() == 0:
-            #     pure_clusters.append(cluster)
-
-        else:
-            if cluster.target_set4() == 0:
-                pure_clusters.append(cluster)
-
+        pure_clusters.append(cluster.target_set3_get_unpolluted())
     return pure_clusters
 
 
@@ -122,8 +114,8 @@ def noisy_data_check(pure_clusters, v_au):
     for cluster in pure_clusters:
         print "testing for noise in cluster ", counter, "/", len(pure_clusters)
         v_au.unlearn(cluster)
-        v_au.init_ground(True)
-        new_detection_rate = v_au.driver.tester.correct_classification_rate()
+        v_au.init_ground()
+        new_detection_rate = v_au.current_detection_rate
         if new_detection_rate > original_detection_rate:
             noisy_clusters.append(cluster)
 
