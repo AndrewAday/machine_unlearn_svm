@@ -77,8 +77,8 @@ class ActiveUnlearner:
             cluster.divide()
 
         h.relearn([self.train_y, self.train_x, self.pol_y, self.pol_x], cluster.working_set, cluster.cluster_set)
-        print "THIS IS NEW TRAIN_Y:" self.train_y
-        print "THIS IS NEW O_TRAIN_Y:" self.o_train_y
+        print "THIS IS NEW TRAIN_Y:", self.train_y
+        print "THIS IS NEW O_TRAIN_Y:", self.o_train_y
         print "Is relearned train_y same as o_train_y? ", self.train_y == self.o_train_y
         print "Is relearned train_x same as o_train_x? ", self.train_x == self.o_train_x
 
