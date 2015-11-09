@@ -26,6 +26,8 @@ class ActiveUnlearner:
 
         self.o_train_y = copy.deepcopy(self.train_y)
         self.o_train_x = copy.deepcopy(self.train_x)
+        self.o_pol_y = copy.deepcopy(self.pol_y)
+        self.o_pol_x = copy.deepcopy(self.pol_x)
 
         # Testing Data
         self.test_y = test_y
@@ -61,6 +63,12 @@ class ActiveUnlearner:
         self.p_val = h.delist(p_val)
         self.current_detection_rate = p_acc[0]
 
+    def update_originals(self):
+        self.o_train_y = copy.deepcopy(self.train_y)
+        self.o_train_x = copy.deepcopy(self.train_x)
+        self.o_pol_y = copy.deepcopy(self.pol_y)
+        self.o_pol_x = copy.deepcopy(self.pol_x)
+
     def unlearn(self, cluster):
         """Unlearns a cluster from the ActiveUnlearner."""
         print "unlearning cluster of size ", len(cluster.cluster_set), " from au"
@@ -75,12 +83,25 @@ class ActiveUnlearner:
         if len(cluster.ham) + len(cluster.spam) != cluster.size:
             print "\nUpdating cluster ham and spam sets...\n"
             cluster.divide()
+        print "Is relearned train_y same as o_train_y before relearning?", self.train_y == self.o_train_y
+        print "Is relearned train_x same as o_train_x before relearning? ", self.train_x == self.o_train_x
+
+        print "Is cluster.working_set the same as o_train_y?", self.o_train_y == cluster.working_set[0]
+        print "Is cluster.working_set the same as o_train_x?", self.o_train_x == cluster.working_set[1]
 
         h.relearn([self.train_y, self.train_x, self.pol_y, self.pol_x], cluster.working_set, cluster.cluster_set)
         print "THIS IS NEW TRAIN_Y:", self.train_y
         print "THIS IS NEW O_TRAIN_Y:", self.o_train_y
-        print "Is relearned train_y same as o_train_y? ", self.train_y == self.o_train_y
-        print "Is relearned train_x same as o_train_x? ", self.train_x == self.o_train_x
+        print "Is relearned train_y same as o_train_y after relearning?", self.train_y == self.o_train_y
+        print "Is relearned train_x same as o_train_x after relearning?", self.train_x == self.o_train_x
+        
+        if self.train_x == self.o_train_x: # let's log the indices where it's not the same
+            diff = []
+            for i in range(len(self.train_x)):
+                if self.train[i] != self.o_train_x[i]:
+                    diff.append(i)
+        print "Cluster set indicies: ", cluster.cluster_set
+        print "Disparities after relearning: ", diff
 
     # --------------------------------------------------------------------------------------------------------------
 
@@ -92,29 +113,6 @@ class ActiveUnlearner:
             h.unlearn([self.train_y, self.train_x, self.pol_y, self.pol_x], messages)
         else:
             h.relearn([self.train_y, self.train_x, self.pol_y, self.pol_x], original, messages)
-        # hams = []
-        # spams = []
-        # for message in messages:
-        #     if message.train == 1 or message.train == 3:
-        #         hams.append(message)
-
-        #     elif message.train == 0 or message.train == 2:
-        #         spams.append(message)
-
-        #     else:
-        #         raise AssertionError("Message lacks train attribute.")
-
-        #     if unlearn:
-        #         self.driver.tester.train_examples[message.train].remove(message)
-
-        #     else:
-        #         self.driver.tester.train_examples[message.train].append(message)
-
-        # if unlearn:
-        #     self.driver.untrain(hams, spams)
-
-        # else:
-        #     self.driver.train(hams, spams)
 
     def cluster_by_gold(self, cluster, old_detection_rate, new_detection_rate, counter):
         """Finds an appropriate cluster around a msg by using the golden section search method."""
