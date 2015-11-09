@@ -65,6 +65,7 @@ def unlearn_stats(au, outfile, train_y, train_x, pol_y, pol_x, test_y, test_x, t
 
         outfile.write("\nSTATS\n")
         outfile.write("---------------------------\n")
+        outfile.write("Unlearn Time: " + str(unlearn_time))
         outfile.write("Initial Detection Rate: " + str(original_detection_rate) + "\n")
         outfile.write("Final Detection Rate: " + str(final_detection_rate) + "\n")
         outfile.write("Total Unlearned:\n")
@@ -160,7 +161,7 @@ def main():
         print "-----Initializing polluted unlearner-----"
         au = ActiveUnlearnDriver.ActiveUnlearner(train_y, train_x, pol_y, pol_x, test_y, test_x,
                                                  params=params, distance_opt="frequency5", 
-                                                 greedy_opt=False)
+                                                 greedy_opt=True)
 
         # vanilla active unlearner
         print "-----Initializing vanilla unlearner-----"
