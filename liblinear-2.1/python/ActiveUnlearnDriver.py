@@ -4,7 +4,7 @@ import helpers as h
 import au_helpers as au_h
 from distance import distance, vectorize_set
 from math import sqrt
-
+import gc
 phi = (1 + sqrt(5)) / 2
 grow_tol = 50 # window tolerance for gold_section_search to maximize positive delta
 shrink_tol = 10 # window tolerance for golden_section_search to minize negative delta
