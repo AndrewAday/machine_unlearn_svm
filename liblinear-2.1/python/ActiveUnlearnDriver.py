@@ -382,8 +382,9 @@ class ActiveUnlearner:
                     self.learn(cluster[1]) # else relearn cluster and move to the next one
                     self.init_ground()
                     detection_rate = self.current_detection_rate
-                    assert detection_rate == old_detection_rate,\
-                         "detection rate %r != old detection rate %r" % (detection_rate, old_detection_rate)
+                    print "detection rate now at: ", detection_rate
+                    # assert detection_rate == old_detection_rate,\
+                    #      "detection rate %r != old detection rate %r" % (detection_rate, old_detection_rate)
 
             if detection_rate > self.threshold:
                 break

@@ -95,8 +95,9 @@ def determine_cluster(center, au, label, init_pos, working_set=None, gold=False,
         au.learn(cluster)
         au.init_ground()
         detection_rate = au.current_detection_rate
-        assert detection_rate == first_state_rate,\
-             "detection rate %r != old detection rate %r" % (detection_rate, first_state_rate)
+        print "detection rate now at: ", detection_rate, " from old rate: ", old_detection_rate
+        # assert detection_rate == first_state_rate,\
+        #      "detection rate %r != old detection rate %r" % (detection_rate, first_state_rate)
 
         return net_rate_change, cluster
 
@@ -106,8 +107,9 @@ def determine_cluster(center, au, label, init_pos, working_set=None, gold=False,
             au.learn(cluster)
             au.init_ground()
             detection_rate = au.current_detection_rate
-            assert detection_rate == first_state_rate,\
-                 "detection rate %r != old detection rate %r" % (detection_rate, first_state_rate)
+            print "detection rate now at: ", detection_rate, " from old rate: ", old_detection_rate
+            # assert detection_rate == first_state_rate,\
+            #      "detection rate %r != old detection rate %r" % (detection_rate, first_state_rate)
 
             second_state_rate = new_detection_rate
             net_rate_change = second_state_rate - first_state_rate
@@ -126,8 +128,9 @@ def determine_cluster(center, au, label, init_pos, working_set=None, gold=False,
             au.learn(cluster)
             au.init_ground()
             detection_rate = au.current_detection_rate
-            assert detection_rate == first_state_rate,\
-                 "detection rate %r != old detection rate %r" % (detection_rate, first_state_rate)
+            print "detection rate now at: ", detection_rate, " from old rate: ", old_detection_rate
+            # assert detection_rate == first_state_rate,\
+            #      "detection rate %r != old detection rate %r" % (detection_rate, first_state_rate)
             return net_rate_change, cluster
 
 def cluster_remaining(au, working_set):
