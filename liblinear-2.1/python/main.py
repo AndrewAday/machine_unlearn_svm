@@ -15,6 +15,7 @@ params = '-c .001 -q'
 # directory = "Mislabeled-Both-2.2-processed"
 directory = "DictionarySets-1.1-processed0.5"
 output = directory + "-unlearn-stats"
+mislabeled = False
 
 # rename helpers variables
 seconds_to_english = helpers.sec_to_english
@@ -137,10 +138,14 @@ def main():
     train_y, train_x = emails[1]
     test_y, test_x = emails[2]
 
-    van_pol_y, van_pol_x = van_emails[0]
-    van_pol_y = [-1 * y for y in van_pol_y] # correct labeling on vanilla
+    van_pol_y, van_pol_x = van_emails[0]    
     van_train_y, van_train_x = van_emails[1]
     van_test_y, van_test_x = van_emails[2]
+    if mislabeled:
+        van_pol_y = [-1 * y for y in van_pol_y] # correct labeling on vanilla
+    else:
+        van_pol_y = [] # Remove all dictionary emails
+        van_pol_x = []
 
     # Calculate the number of emails for polluted, train, test, and total data sets
     size = emails[3]
