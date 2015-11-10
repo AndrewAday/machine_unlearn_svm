@@ -142,7 +142,7 @@ def cluster_remaining(au, working_set):
 
     first_state_rate = au.current_detection_rate
 
-    size = len(h.strip(working_set[0])) # get number of remaining emails
+    size = len(h.strip(working_set[0] + working_set[2])) # get number of remaining emails
     init_email = None
     init_pos = None
     label = None
