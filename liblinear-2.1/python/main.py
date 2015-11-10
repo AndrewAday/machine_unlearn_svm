@@ -92,9 +92,6 @@ def unlearn_stats(au, outfile, train_y, train_x, pol_y, pol_x, test_y, test_x, t
         outfile.write(unlearn_time)
         outfile.write("\n") #always end files w/ newline
 
-        if clusters:
-            return cluster_list
-
 
 def find_pure_clusters(cluster_list):
     pure_clusters = []
