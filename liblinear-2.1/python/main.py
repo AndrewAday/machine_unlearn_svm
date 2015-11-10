@@ -12,7 +12,8 @@ import ActiveUnlearnDriver
 params = '-c .001 -q'
 
 # Choose directory we want to process
-directory = "Mislabeled-Both-2.2-processed"
+# directory = "Mislabeled-Both-2.2-processed"
+directory = "DictionarySets-1.1-processed0.5"
 output = directory + "-unlearn-stats"
 
 # rename helpers variables

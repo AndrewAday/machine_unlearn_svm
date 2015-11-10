@@ -2,7 +2,7 @@
 sets = {'Set1', 'Set2', 'Set3'};
 
 polluted_percentage = .5;
-directory = 'Mislabeled-Both-1.2';
+directory = 'DictionarySets-1.1';
 o_directory = [directory '-processed'];
 
 fprintf(['Preprocessing emails from ' directory '\n']);
