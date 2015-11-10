@@ -349,7 +349,7 @@ class ActiveUnlearner:
         # returns list of tuples contained (net_rate_change, cluster)
         cluster_list = au_h.cluster_au(self, gold=gold) 
         
-        rejection_rate = .1 # Reject all clusters <= this threshold delta value
+        rejection_rate = .01 # Reject all clusters <= this threshold delta value
         attempt_count += 1
 
         print "Lazy Unlearn Attempt " + str(attempt_count) + " cluster length: ", len(cluster_list)
