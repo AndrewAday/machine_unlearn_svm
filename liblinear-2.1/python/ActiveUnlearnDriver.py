@@ -99,8 +99,9 @@ class ActiveUnlearner:
             for i in range(len(self.train_x)):
                 if self.train_x[i] != self.o_train_x[i]:
                     diff.append(i)
-        print "Cluster set indicies: ", cluster.cluster_set
-        print "Disparities after relearning: ", diff
+            print "Cluster set indicies: ", cluster.cluster_set
+            print "Disparities after relearning: ", diff
+        
 
     # --------------------------------------------------------------------------------------------------------------
 
