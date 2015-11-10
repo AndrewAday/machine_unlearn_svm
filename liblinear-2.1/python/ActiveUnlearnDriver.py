@@ -228,7 +228,9 @@ class ActiveUnlearner:
             self.divide_new_elements(new_relearns, False, cluster.working_set)
 
         else:
-            raise AssertionError("Pointer is at the midpoint of the window.")
+            # pointer is at midpoint, return cluster
+            print 'Pointer is at the midpoint of the window.'
+            # raise AssertionError("Pointer is at the midpoint of the window.")
 
         self.init_ground()
         detection_rate = self.current_detection_rate
