@@ -2,7 +2,7 @@
 sets = {'Set1', 'Set2', 'Set3'};
 
 
-directory = 'Mislabeled-Both-3.1';
+directory = 'Mislabeled-Both-1.2';
 o_directory = [directory '-processed'];
 mkdir(o_directory);
 
